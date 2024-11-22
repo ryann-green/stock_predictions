@@ -1,0 +1,1 @@
+pip install gspread oauth2c

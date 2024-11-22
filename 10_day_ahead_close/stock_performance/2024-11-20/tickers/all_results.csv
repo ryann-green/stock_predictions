@@ -1,0 +1,2 @@
+,ticker,total_predictions,total_correct_predicions,overall_success_rate,predicted_higher_correct,total_predicted_higher,predicted_higher_success_rate,adj_sell_vs_pred_pct,latest_close,last_date_for_prediction,prediction_price,adj_prediction_price,adj_prediction_higher,stop_loss 
+0,AAPL,38,28,0.7368421052631579,14,19,0.7368421052631579,-0.001807438130871314,228.27999877929688,2024-11-19,226.05679885864257,225.64821518064275,False,-0.06770410343092315

@@ -1,0 +1,2 @@
+,ticker,total_predictions,total_correct_predicions,overall_success_rate,predicted_higher_correct,total_predicted_higher,predicted_higher_success_rate,average_act_vs_pred_diff,median_act_vs_pred_diff,sell_vs_pred
+0,AAPL,36,22,0.6111111111111112,9,18,0.5,7.28762087488843e-05,-0.0033758292486182886,-0.001651476519934702
