@@ -15,7 +15,7 @@ def prep_train_test_data(data,feature_cols,target_col):
 
     # # # Get the selected feature names
     selected_feature_names = [feature_cols[i] for i in k_best_features.get_support(indices=True)]
-    print(selected_feature_names)
+    # print(selected_feature_names)
 
     # # # Convert X_train_selected and X_test_selected back to DataFrames for easier manipulation
     X_train_selected_df = pd.DataFrame(X_train_selected, index=X_train.index, columns=selected_feature_names).sort_index(ascending=True)

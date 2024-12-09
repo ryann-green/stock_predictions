@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 def get_missing_dates():
     last_data_date= datetime.strptime(max(pd.read_csv('total_results.csv')['last_date_for_prediction']),'%Y-%m-%d').date()
     current_date=datetime.now().date()
-    print(current_date-last_data_date)
+    # print(current_date-last_data_date)
 
     # Generate all dates between the last date and current date
     date_list = []

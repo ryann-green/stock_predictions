@@ -13,6 +13,9 @@ from prediction_days_ahead import shift_ahead
 from generate_features import generate_lead_features
 from train_data import prep_train_test_data
 from model_evaluation import evaluate_models
+from build_results import increment_predictions
+import warnings
+warnings.filterwarnings('ignore')
 
 
 # Steps to operationalize
@@ -128,7 +131,7 @@ for date in missing_dates:
     # start_date = (end_date- timedelta(days=125 * 1)).strftime('%Y-%m-%d')
     days_ahead=10
 
-    prediction_results=[]
+    prediction_results=[] 
     detailed_results=[]
 
     completed=[]
@@ -138,7 +141,7 @@ for date in missing_dates:
         if ticker not in completed:
             completed.append(ticker)
         
-            print(ticker)
+            # print(ticker)
             
             data= shift_ahead (
                     get_initial_df(ticker,start_date,end_date)
@@ -258,8 +261,8 @@ for date in missing_dates:
             latest_features = last_row[selected_feature_names].values.reshape(1, -1)
 
             # Step 2: Use the best model to predict the closing price 10 days in advance
-            if ticker =='XLU':
-                print(latest_features)
+            # if ticker =='XLU':
+            #     print(latest_features)
             predicted_price_10_days_ahead = best_model.predict(latest_features)[0]
 
             # Step 3: Output the prediction
@@ -302,14 +305,18 @@ for date in missing_dates:
             
             detailed_results.append(evaluation_df)
             
-            print(full.iloc[-1:])
+            # print(full.iloc[-1:])
 
     all_results=pd.DataFrame(prediction_results).sort_values('predicted_higher_success_rate', ascending=False)
     all_results.to_csv(f'{new_folder_path}/all_results.csv')
-    all_results.to_csv('~/Code/stock_predictions/dash/latest_results.csv')
+    # all_results.to_csv('~/Code/stock_predictions/dash/latest_results.csv')
     pd.concat(detailed_results).to_csv(f'{new_folder_path}/detailed_results.csv')
     
-    total_results.append(all_results)
+    print(new_folder_path)
     
-pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
+    # total_results.append(all_results)
+    
+    increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions_table.csv')
+    
+# pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
 
