@@ -49,7 +49,21 @@ def increment_predictions(target,table):
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
     
     #get the DataFrame of the file that I want to append the results to for the predictions
-    incremented_summary = pd.read_csv(table)
+    incremented_summary = pd.read_csv(table)[['ticker'
+                                              ,'total_predictions'
+                                              ,'total_correct_predicions'
+                                              ,'overall_success_rate'
+                                              ,'predicted_higher_correct'
+                                              ,'total_predicted_higher'
+                                              ,'predicted_higher_success_rate'
+                                              ,'adj_sell_vs_pred_pct'
+                                              ,'latest_close'
+                                              ,'last_date_for_prediction'
+                                              ,'prediction_price'
+                                              ,'adj_prediction_price'
+                                              ,'adj_prediction_higher'
+                                              ,'stop_loss '
+                                              ,'adj_prediction_price_w_high_inc']]
     current_max_date=max(incremented_summary['last_date_for_prediction'])
 
     # Loop through all the subdirectories in the parent folder
@@ -68,7 +82,21 @@ def increment_predictions(target,table):
                 if os.path.isfile(file_path):
                     if  'all_results' in file_path :
                         try:
-                            new_data = pd.read_csv(file_path)  # Replace with pd.read_excel(file_path) for Excel files
+                            new_data = pd.read_csv(file_path)[['ticker'
+                                              ,'total_predictions'
+                                              ,'total_correct_predicions'
+                                              ,'overall_success_rate'
+                                              ,'predicted_higher_correct'
+                                              ,'total_predicted_higher'
+                                              ,'predicted_higher_success_rate'
+                                              ,'adj_sell_vs_pred_pct'
+                                              ,'latest_close'
+                                              ,'last_date_for_prediction'
+                                              ,'prediction_price'
+                                              ,'adj_prediction_price'
+                                              ,'adj_prediction_higher'
+                                              ,'stop_loss '
+                                              ,'adj_prediction_price_w_high_inc']]
                             
                             new_date=max(new_data['last_date_for_prediction'])
 
@@ -108,7 +136,7 @@ def fill_missing_evaluations():
 
 # using for testing functions
 # if __name__ == "__main__":
-#     # predictions_table = build_predictions('10_day_ahead_close/stock_performance')
+#      predictions_table = build_predictions('10_day_ahead_close/stock_performance')
 #     increment_predictions('10_day_ahead_close/stock_performance/2024-12-05/tickers','predictions_table.csv')
 
 

@@ -2,7 +2,10 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 def get_missing_dates():
-    last_data_date= datetime.strptime(max(pd.read_csv('total_results.csv')['last_date_for_prediction']),'%Y-%m-%d').date()
+    # use this to rebuild predictions when needed
+    # last_data_date = datetime(2023, 12, 31).date()
+
+    last_data_date= datetime.strptime(max(pd.read_csv('predictions_table.csv')['last_date_for_prediction']),'%Y-%m-%d').date()
     current_date=datetime.now().date()
     # print(current_date-last_data_date)
 

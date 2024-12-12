@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 
 # Input data for multiple stocks
 # stocks_data = pd.read_csv('total_results.csv')  
-stocks_data = pd.read_csv('total_results.csv')
+stocks_data = pd.read_csv('predictions_table.csv')
 
  
 # Function to determine which trigger got hit first
@@ -58,6 +58,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
     first_trigger_date = None
     first_trigger_price = None
     
+    # if high ptice is reached, do assignments to predicted price
     if not adj_price_dates.empty:
         first_adj_index = adj_price_dates.index[0]
         first_adj_date=adj_price_dates.loc[first_adj_index, 'Date']
@@ -76,7 +77,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
     if first_adj_date and (not first_stop_date or first_adj_date < first_stop_date):
         first_trigger = "target_price"
         first_trigger_date = first_adj_date
-        first_trigger_price = first_adj_price
+        first_trigger_price = adj_prediction_price
     elif first_stop_date:
         first_trigger = "stop_loss"
         first_trigger_date = first_stop_date
@@ -104,7 +105,10 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
 def fetch_historical_data(stocks_data):
     tickers = stocks_data['ticker'].unique()
     start_date = (datetime.strptime(stocks_data['last_date_for_prediction'].min(), "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    print(start_date)
+
     end_date = (datetime.strptime(stocks_data['last_date_for_prediction'].max(), "%Y-%m-%d") + timedelta(days=15)).strftime("%Y-%m-%d")
+    print(end_date )
     
     print("Fetching historical data for all tickers...")
     all_data=[]
@@ -119,25 +123,36 @@ def fetch_historical_data(stocks_data):
 # Process all stocks
 def process_stocks(stocks_data, historical_data):
     results = []
+    # completed_dates=[]
     for _, stock in stocks_data.iterrows():
-        ticker_data = historical_data.loc[historical_data['ticker']==stock[1]]
+        
+        ticker=stock[2]
+        
+        ticker_data = historical_data.loc[historical_data['ticker']==ticker]
+        
         # print(ticker_data)
 
         if ticker_data is not None:
-            print(stock[10] )
+            
+            ticker_date=stock[11]
+            
             result = check_first_trigger(historical_data=ticker_data,
-                ticker=stock[1],
-                buy_price=stock[9],
-                overall_success_rate=stock[4],
-                predicted_higher_success_rate=stock[7],
-                last_date=stock[10],
-                adj_prediction_price=stock[12],
-                adj_price_higher=stock[13],
-                stop_loss=stock[14],
-                latest_close=stock[9]
+                ticker=ticker,
+                buy_price=stock[10],
+                overall_success_rate=stock[5],
+                predicted_higher_success_rate=stock[8],
+                last_date=ticker_date,
+                adj_prediction_price=stock[16], 
+                adj_price_higher=stock[14],
+                stop_loss=stock[15],
+                latest_close=stock[10]
             )
-            if result:
+            
+            if result :
+                # if ticker_date not in completed_dates:
+                # +rint(ticker_date)
                 results.append(result)
+                    # completed_dates.append(ticker_date)
         time.sleep(1)  # Optional: Add delay to prevent rapid processing
         # print(results)
     return results
