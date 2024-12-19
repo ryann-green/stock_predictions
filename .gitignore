@@ -162,3 +162,9 @@ cython_debug/
 # File folders for testing
 10_day_ahead_close/
 10_day_ahead_low/
+
+gsheet.py
+install.py
+install.py
+gsheet.py
+/10_day_ahead_close

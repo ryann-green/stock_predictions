@@ -1,12 +1,18 @@
-import pandas as pd
+# general libraries
+import os
 from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+# libs imported using requirements.tx
 from sklearn.ensemble import RandomForestRegressor,GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 from xgboost import XGBRegressor
 import numpy as np
-import os
-from datetime import datetime
-from sklearn.metrics import mean_squared_error
+import pandas as pd
+
+# custom libraries
 from get_missing_dates import get_missing_dates
 from get_data import get_initial_df
 from prediction_days_ahead import shift_ahead
@@ -14,8 +20,7 @@ from generate_features import generate_lead_features
 from train_data import prep_train_test_data
 from model_evaluation import evaluate_models
 from build_results import increment_predictions
-import warnings
-warnings.filterwarnings('ignore')
+
 
 
 # Steps to operationalize
