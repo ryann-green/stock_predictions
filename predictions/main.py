@@ -26,10 +26,8 @@ from build_results import increment_predictions
 # Steps to operationalize
 # Identify the ideal buying price that is just not the last closing wprice to optimize profit
 
-# 1. Find the dates between the  max_date of total results csv and today
-# 2. Those should be the dates read into the "dates" variable below to get the data caught up to current date
-# 3. append the results of this script to the latest tota results csv/file
-# 4. Have the check_price process run to evaluate the results of these predictions for dates where the end date of the prediction is less than today and is greater than the last day in the Summary results
+# 1. Move to working on evaluation automation
+# 2. Have the check_price process run to evaluate the results of these predictions for dates where the end date of the prediction is less than today and is greater than the last day in the Summary results
 
 # -------------------------------
 # Later

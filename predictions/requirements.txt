@@ -1,4 +1,4 @@
-pandas
+pandas-ta.git@development
 numpy
 scikit-learn
 xgboost
