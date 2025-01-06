@@ -6,7 +6,7 @@ def get_initial_df (ticker,start_date,end_date):
         data = yf.download(ticker, start=start_date, end=end_date)
         # Calculate leading technical indicators
         data['ALMA'] = ta.alma(data['Close'])
-        stoch_rsi = pd.series(ta.stochrsi(data['Close']))
+        stoch_rsi = ta.stochrsi(data['Close'])
         print('this is data close')
         print(data['Close'])
         print('this is stoch_rsi')
