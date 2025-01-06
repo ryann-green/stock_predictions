@@ -1,6 +1,5 @@
-pandas
+git+https://github.com/twopirllc/pandas-ta.git@development
 numpy
 scikit-learn
 xgboost
 yfinance
-pandas-ta

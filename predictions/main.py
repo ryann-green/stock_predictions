@@ -13,23 +13,21 @@ import numpy as np
 import pandas as pd
 
 # custom libraries
-from get_missing_dates import get_missing_dates
-from get_data import get_initial_df
-from prediction_days_ahead import shift_ahead
-from generate_features import generate_lead_features
-from train_data import prep_train_test_data
-from model_evaluation import evaluate_models
-from build_results import increment_predictions
+from utils.get_missing_dates import get_missing_dates
+from utils.get_data import get_initial_df
+from utils.prediction_days_ahead import shift_ahead
+from utils.generate_features import generate_lead_features
+from utils.train_data import prep_train_test_data
+from utils.model_evaluation import evaluate_models
+from utils.build_results import increment_predictions, increment_non_trigger_evals
 
 
 
 # Steps to operationalize
 # Identify the ideal buying price that is just not the last closing wprice to optimize profit
 
-# 1. Find the dates between the  max_date of total results csv and today
-# 2. Those should be the dates read into the "dates" variable below to get the data caught up to current date
-# 3. append the results of this script to the latest tota results csv/file
-# 4. Have the check_price process run to evaluate the results of these predictions for dates where the end date of the prediction is less than today and is greater than the last day in the Summary results
+# 1. Move to working on evaluation automation
+# 2. Have the check_price process run to evaluate the results of these predictions for dates where the end date of the prediction is less than today and is greater than the last day in the Summary results
 
 # -------------------------------
 # Later
@@ -277,7 +275,7 @@ for date in missing_dates:
             adj_prediction_price=predicted_price_10_days_ahead*(1+(average_act_vs_pred_diff+median_act_vs_pred_diff)/2)
             pred_results['adj_prediction_price']=adj_prediction_price
             pred_results['adj_prediction_higher']=adj_prediction_price>last_row['Close'][0]
-            pred_results['stop_loss ']=full['stop_loss'].min()
+            pred_results['stop_loss']=full['stop_loss'].min()
             # print(f"Adj Price {adj_prediction_price}")
             # print(f"Adj Price w/high {adj_prediction_price*(1+ data['close_high_avg'].max())}")
             pred_results['adj_prediction_price_w_high_inc']=adj_prediction_price*(1+ data['close_high_avg'].max())
@@ -321,7 +319,8 @@ for date in missing_dates:
     
     # total_results.append(all_results)
     
-    increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions_table.csv')
+    increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/predictions_table.csv')
+    increment_non_trigger_evals((f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/non_trigger_stocks.csv'))
     
 # pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
 

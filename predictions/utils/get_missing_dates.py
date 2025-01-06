@@ -5,7 +5,7 @@ def get_missing_dates():
     # use this to rebuild predictions when needed
     # last_data_date = datetime(2023, 12, 31).date()
 
-    last_data_date= datetime.strptime(max(pd.read_csv('predictions_table.csv')['last_date_for_prediction']),'%Y-%m-%d').date()
+    last_data_date= datetime.strptime(max(pd.read_csv('predictions/predictions_table.csv')['last_date_for_prediction']),'%Y-%m-%d').date()
     current_date=datetime.now().date()
     # print(current_date-last_data_date)
 
