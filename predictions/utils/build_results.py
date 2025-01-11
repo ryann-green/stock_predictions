@@ -126,6 +126,7 @@ def increment_predictions(target,table):
    
 # run this everytime the predictions script is ran to add on to non_trigger_stocks for new predictions
 def increment_non_trigger_evals (target,table):
+    print('Running increment_non_trigger_evals function')
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
     
     #get the DataFrame of the file that I want to append the results to for the predictions
@@ -158,7 +159,7 @@ def increment_non_trigger_evals (target,table):
                 if os.path.isfile(file_path):
                     if  'all_results' in file_path :
                         
-                        print(file_path)
+                        # print(file_path)
                         try:
                             new_data = pd.read_csv(file_path)[['ticker'
                                               ,'latest_close'
@@ -167,7 +168,7 @@ def increment_non_trigger_evals (target,table):
                                               ,'last_date_for_prediction'
                                               ,'adj_prediction_price_w_high_inc'
                                               ,'adj_prediction_higher'
-                                              ,'stop_loss '
+                                              ,'stop_loss'
                                               ]]
                             
                             new_data['buy_price']=new_data['latest_close']
@@ -186,7 +187,7 @@ def increment_non_trigger_evals (target,table):
                                                       , "adj_prediction_price_w_high_inc": "adj_prediction_price"
                                                       , "adj_prediction_higher": "adj_price_higher"
                                                       , "stop_loss ": "stop_loss"}, inplace=True)
-                            print(new_data.columns)
+                            # print(new_data.columns)
 
                             
                             new_date=max(new_data['last_date'])
@@ -200,7 +201,7 @@ def increment_non_trigger_evals (target,table):
                                 print(f"Length of new data: {len(new_data)}")
                                 print(f"Length of combined data after concat {len(pd.concat([incremented_summary,new_data]))}")
                                 
-                                pd.concat([incremented_summary,new_data]).to_csv(table)
+                                pd.concat([incremented_summary,new_data]).reset_index(drop=True).to_csv(table)
                                 # print(pd.concat([incremented_summary,new_data]))
                                 
                                 # print(f'Non-Triggered Stocks updated with data from {new_date}')
@@ -222,15 +223,34 @@ def increment_non_trigger_evals (target,table):
     return 'increment_non_trigger_evals'
 
 # run this in backtesting to increment to existing backtest results table
-def increment_backtest_results(old_results,new_results):
-    print('old results')
-    print(pd.read_csv(old_results))
+def increment_results(old_results_path,new_results):
     
-    print('new_results')
-    print(new_results)
+    print('------------------------------------------')
+
+    print('Running increment_results function')
+    print('Incrementing Backtesting Results')
+    print('Retrieving existing backtesting results')
+    old_backtest_results=pd.read_csv(old_results_path)
+    # old_max_date=max(old_backtest_results['pred_date'])
     
+    # print('new_results')
+    print('Retrieving new backtesting results')
+    new_backtest_results=pd.DataFrame(new_results)
+    # new_max_date=max(new_backtest_results['pred_date'])
+
+    # print(f"Current max date: {old_max_date}")
+    # print(f"New data date: {new_max_date}")
+    print(f"Length of old table: {len(old_backtest_results)}")
+    print(f"Length of new data: {len(new_backtest_results)}")
+    print(f"Length of combined data after concat {len(pd.concat([old_backtest_results,new_backtest_results]))}")
     
-    return 'increment_backtest_resultss'
+    pd.concat([old_backtest_results,new_backtest_results]).to_csv(old_results_path)
+    
+    return 'incremented_results'
+
+def print_incremented_summary (old_results,new_results):
+    
+    return "Incremented summary statistics"
 
 
 # using for testing functions
@@ -240,5 +260,5 @@ if __name__ == "__main__":
 
 #     # print(pd.read_csv('predictions/non_trigger_stocks.csv'))
 #     incremented_table = increment_non_trigger_evals('10_day_ahead_close/stock_performance/2025-01-04/tickers','predictions/non_trigger_stocks.csv')
-    increment_backtest_results('predictions/backtest_results.csv')
-#     print(incremented_table)
+    # increment_results('predictions/backtest_results.csv')
+    print('Hi')
