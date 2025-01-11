@@ -3,22 +3,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 import warnings
 import time
-from build_results import increment_backtest_results
+from build_results import increment_results
 
 warnings.filterwarnings("ignore")
-
-# steps to operationalize
-# 1. For stocks that don't meet the high or low triggers, add them to a separate csv with ticker and prediction date for future analysis
-# 2. Check to see the latest date for prediction date for each stock in the Summary results csv file. Find the results in the total_results csv that are greater than the ticker+pred_date from the summary file, and use those values to start this price evaluation script.
-# 3. Create different segments in sheets to evaluate success of stocks
-# 4. Identify top stock to trade on a day of the week based on best chance of profitability within 15 days
-    #segment by best combination of
-    # day of week success
-    # overall success rate
-    # predicted higher success rate
-    # predicted higher boolean flag .. validation whether or not my prediction prices actually give me the best chance of success based on subsequent high and low prices    
-# 5. Based on suggestion above, Figure out stock to trade on next possible trading day based on the latest daste in the "total results" csv file.
-
 
 # Input data for multiple stocks
 # stocks_data = pd.read_csv('total_results.csv')  
@@ -121,7 +108,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
             "profit_pct_per_stock": profit_pct
         }
     else:
-        print(f"{(h_data['ticker'])} has no trigger price as of {last_date}")
+        print(f"{(ticker)} from {(last_date)} has no trigger price as of 1/9/2025")
         
         return None
         
@@ -140,6 +127,8 @@ def process_stocks(stocks_data, historical_data):
         
         ticker=stock[1]
         # print(ticker)
+        
+        # if ticker in 'MA':
         
         ticker_data = historical_data.loc[historical_data['ticker']==ticker]
         
@@ -190,13 +179,13 @@ if __name__ == "__main__":
     historical_data = fetch_historical_data(stocks_data)
     processed_results,non_triggers = process_stocks(stocks_data, historical_data)
     # print(processed_results)
-    increment_backtest_results('predictions/backtest_results.csv',processed_results)
     results_df = pd.DataFrame(processed_results)
+    increment_results('predictions/backtest_results.csv',processed_results)
+    # print(results_df)
     # results_df.to_csv('summary_results.csv', index=False)
     
     
     # the below should get me a csv file of the trickers and dates that I'd need to check on the next run
     # will need to add a clause that ignores ticker from X period in the past
     non_triggers_df=pd.DataFrame(non_triggers)
-    # non_triggers_df.to_csv('non_trigger_stocks.csv', index=False)
-    # print(results_df)
+    non_triggers_df.to_csv('predictions/non_trigger_stocks.csv') 

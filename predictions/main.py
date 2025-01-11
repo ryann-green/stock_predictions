@@ -320,7 +320,9 @@ for date in missing_dates:
     # total_results.append(all_results)
     
     increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/predictions_table.csv')
-    increment_non_trigger_evals((f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/non_trigger_stocks.csv'))
+    increment_non_trigger_evals(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/non_trigger_stocks.csv')
+    
+    # At this point we will run backtesting.py
     
 # pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
 
