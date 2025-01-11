@@ -6,7 +6,8 @@ def generate_lead_features (data,days_ahead):
 
         for i in range(1, days_ahead):
             
-            cols=['Close', 'ALMA', 'Stochastic_RSI', 'Williams_%R', 'ROC']
+            # cols=['Close', 'ALMA', 'Stochastic_RSI', 'Williams_%R', 'ROC']
+            cols=['Close', 'ALMA', 'Williams_%R', 'ROC']
             
             # add each day close and volume change as additional columns to evaluate for features
             for n in range(1, days_ahead):

@@ -7,11 +7,13 @@ def get_initial_df (ticker,start_date,end_date):
         # Calculate leading technical indicators
         data['ALMA'] = ta.alma(data['Close'])
         stoch_rsi = ta.stochrsi(data['Close'])
+        # stoch_rsi = ta.rsi(data['Close'])
+
         print('this is data close')
         print(data['Close'])
         print('this is stoch_rsi')
         print(stoch_rsi)
-        data['Stochastic_RSI'] = stoch_rsi['STOCHRSIk_14_14_3_3']
+        # data['Stochastic_RSI'] = stoch_rsi['STOCHRSIk_14_14_3_3']
         data['Williams_%R'] = ta.willr(data['High'], data['Low'], data['Close'])
         data['ROC'] = ta.roc(data['Close'])
         data['low_close_spread']= (data['Low']-data['Close'])/data['Low']

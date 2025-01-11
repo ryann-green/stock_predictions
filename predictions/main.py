@@ -182,8 +182,8 @@ for date in missing_dates:
             # print(feature_cols)
             
             # get the main columns for the current day that aren't shifted. These need to be included to gauge the latest days information to include in the model
-            main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Stochastic_RSI','Williams_%R','ROC']
-            
+            # main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Stochastic_RSI','Williams_%R','ROC']
+            main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Williams_%R','ROC']
             for col in main_cols:
                 feature_cols.append(col)
             
