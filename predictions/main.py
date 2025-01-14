@@ -50,7 +50,6 @@ total_results=[]
   
 for date in missing_dates:
     
-
     # Get the current date in YYYY-MM-DD format
     current_date = datetime.strptime(date,'%Y-%m-%d').date()
     # current_date = date[1]['date']
