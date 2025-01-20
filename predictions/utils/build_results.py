@@ -2,6 +2,8 @@
 # This script will be used to build and increment on the final table as new predictions are made
 import os
 import pandas as pd
+# from utils.g_sheet import get_credentials, add_sheet_data,delete_sheet_data
+import gspread
 
 # when I build other models, I can reuse this function to build the aggregated predictions for that model
 def build_predictions(target):
@@ -109,8 +111,11 @@ def increment_predictions(target,table):
                                 print(f"Length of new data: {len(new_data)}")
                                 print(f"Length of combined data after concat {len(pd.concat([incremented_summary,new_data]))}")
                                 
+                                # update locally
                                 pd.concat([incremented_summary,new_data]).to_csv(table)
                                 
+                                # update to google sheets
+                                # add_sheet_data(get_credentials(),'predictions_table',new_data)
                                 print(f'Predictions summary updated with data from {new_date}')
                                 
                                 return f'Predictions summary updated with data from {new_date}'
@@ -204,6 +209,10 @@ def increment_non_trigger_evals (target,table):
                                 pd.concat([incremented_summary,new_data]).reset_index(drop=True).to_csv(table)
                                 # print(pd.concat([incremented_summary,new_data]))
                                 
+                                 # update to google sheets
+                                # add_sheet_data(get_credentials(),'non_trigger_stocks',new_data)
+                                print(f'non_trigger_stocks updated in gsheets  with data from {new_date}')
+                                
                                 # print(f'Non-Triggered Stocks updated with data from {new_date}')
                                 
                                 return f'Non-Triggered Stocks updated with data from {new_date}'
@@ -230,13 +239,25 @@ def increment_results(old_results_path,new_results):
     print('Running increment_results function')
     print('Incrementing Backtesting Results')
     print('Retrieving existing backtesting results')
-    old_backtest_results=pd.read_csv(old_results_path)
+    old_backtest_results=pd.read_csv(old_results_path)[['ticker'
+                                                        ,'pred_date'
+                                                        ,'overall_success_rate'
+                                                        ,'predicted_higher_success_rate'
+                                                        ,'predicted_price_higher'
+                                                        ,'first_trigger'
+                                                        ,'first_trigger_date'
+                                                        ,'first_trigger_price'
+                                                        ,'profit_per_stock'
+                                                        ,'profit_pct_per_stock']]
     # old_max_date=max(old_backtest_results['pred_date'])
+    print(old_backtest_results)
     
     # print('new_results')
     print('Retrieving new backtesting results')
     new_backtest_results=pd.DataFrame(new_results)
     # new_max_date=max(new_backtest_results['pred_date'])
+    print(new_backtest_results)
+
 
     # print(f"Current max date: {old_max_date}")
     # print(f"New data date: {new_max_date}")
@@ -251,6 +272,88 @@ def increment_results(old_results_path,new_results):
 def print_incremented_summary (old_results,new_results):
     
     return "Incremented summary statistics"
+
+
+#############################################################
+#############################################################
+# Google sheets functions below
+
+def get_credentials():
+    from google.oauth2.service_account import Credentials
+
+    SERVICE_ACCOUNT_FILE = 'C:/Users/datax/Code/stock_predictions/predictions/utils/service_account.json'
+
+    # print(SERVICE_ACCOUNT_FILE)
+
+    # Scopes required for accessing Google Sheets
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive.file", 
+            "https://www.googleapis.com/auth/drive"]
+
+    # Authenticate using the service account
+    credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+    # print(credentials)
+    # Authorize the gspread client
+    client = gspread.authorize(credentials)
+    
+    return client
+
+
+
+
+def get_sheet_data (client,spreadsheet_name):
+    
+    # Open the Google Sheet by name
+    sheet = client.open(spreadsheet_name).sheet1  # Access the first sheet (Sheet1)
+
+    # Read all data from the sheet
+    data = sheet.get_all_values()
+
+    # Print the data
+    print("Google Sheet Data:")
+    df=pd.DataFrame(data)
+    df.columns = df.iloc[0]  # Set the first row as the header
+    df = df[1:]
+    # 
+    # print(df)
+    
+    return df
+
+# needed to increment predictions & non_trigger evals on main.py
+# needed to increment backtesting csv on backtesting.py
+
+def add_sheet_data (client,spreadsheet_name,new_data):
+    
+    # Open the Google Sheet by name
+    sheet = client.open(spreadsheet_name).sheet1  # Access the first sheet (Sheet1)    
+
+    for row, i in new_data.iterrows():
+        # Use the actual column names
+        sheet.append_row(i.tolist())
+        print("Data appended successfully!")
+    # print(df)
+    
+    return 'Data Appended successfully'
+
+# after backtesting.py runs and increments the backtesting gsheet, need to delete the sheet data except for the headers
+# then need to run add_sheet_data for non_trigger_evals sheet for the remaining results not captured
+def delete_sheet_data(client,spreadsheet_name):
+    # Open the Google Sheet by name
+    sheet = client.open(spreadsheet_name).sheet1  # Access the first sheet (Sheet1)
+
+    # Data to append (each inner list represents a row)
+    
+    # Delete all data in the sheet
+    sheet.clear()
+
+    print("All data cleared from the sheet.")
+    
+    return 'data deleted'
+
+
+        
+# if __name__ == "__main__":
 
 
 # using for testing functions

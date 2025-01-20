@@ -1,11 +1,15 @@
 import yfinance as yf
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 import pandas as pd
 import warnings
 import time
 from build_results import increment_results
 
 warnings.filterwarnings("ignore")
+
+
+# Get the current date
+current_date = date.today()
 
 # Input data for multiple stocks
 # stocks_data = pd.read_csv('total_results.csv')  
@@ -95,6 +99,8 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
         profit = first_trigger_price - buy_price
         profit_pct = profit / buy_price
         
+        print(f"{(ticker)} from {(last_date)} has a {first_trigger} trigger price as of {first_trigger_date} for a {profit} profit")
+        
         return {
             "ticker": ticker,
             "pred_date": last_date,
@@ -108,7 +114,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
             "profit_pct_per_stock": profit_pct
         }
     else:
-        print(f"{(ticker)} from {(last_date)} has no trigger price as of 1/9/2025")
+        print(f"{(ticker)} from {(last_date)} has no trigger price as of {current_date}")
         
         return None
         
@@ -152,7 +158,7 @@ def process_stocks(stocks_data, historical_data):
             
             if result :
                 # if ticker_date not in completed_dates:
-                # print(ticker_date)
+                # print(ticker_date)   
                 results.append(result)
                     # completed_dates.append(ticker_date)
             else:
