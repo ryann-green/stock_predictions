@@ -6,7 +6,7 @@ from data_loader import load_data  # Import here once
 # Load the data globally
 # br_df = backtesting results
 # p_df = prediction results
-br_df, p_df = load_data()
+br_df, p_df, recs_df = load_data()
 
 def register_callbacks(app):
     @app.callback(
@@ -64,3 +64,46 @@ def register_callbacks(app):
         
         # Return a Graph component
         return dcc.Graph(figure=fig)
+    
+    @app.callback(
+        Output("ranked-container", "children"),
+        [
+            Input("weight-median-profit", "value"),
+            Input("weight-success-ratio", "value"),
+            Input("weight-spread", "value"),
+            Input("weight-non-trigger", "value"),
+            Input("weight-predictions", "value"),
+        ],
+    )
+    def update_rankings(w_median, w_success, w_spread, w_non_trigger, w_predictions):
+        # Normalize weights to sum to 1
+        total_weight = w_median + w_success + w_spread + w_non_trigger + w_predictions
+        normalized_weights = {
+            "14_day_median_profit_rank": w_median / total_weight,
+            "success_ratio_rank": w_success / total_weight,
+            "spread_rank": w_spread / total_weight,
+            "non_trigger_rank": w_non_trigger / total_weight,
+            "predictions_rank": w_predictions / total_weight,
+        }
+
+        # Calculate weighted rankings
+        recs_df["weighted_rank"] = (
+            recs_df["14_day_median_profit_rank"] * normalized_weights["14_day_median_profit_rank"]
+            + recs_df["success_ratio_rank"] * normalized_weights["success_ratio_rank"]
+            + recs_df["spread_rank"] * normalized_weights["spread_rank"]
+            + recs_df["non_trigger_rank"] * normalized_weights["non_trigger_rank"]
+            + recs_df["predictions_rank"] * normalized_weights["predictions_rank"]
+        )
+        ranked_df = recs_df.sort_values(by="weighted_rank",ascending=False).reset_index(drop=True)
+
+        # Return the updated table
+        return DataTable(
+            id="ranked-table",
+            columns=[
+                {"name": col, "id": col} for col in ranked_df.columns
+            ],
+            data=ranked_df.to_dict("records"),
+            sort_action="native",
+            page_action="native",
+            page_size=10,
+        )

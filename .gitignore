@@ -165,3 +165,4 @@ gsheet.py
 10_day_ahead_close
 10_day_ahead_close/
 service_account.json
+*.csv
