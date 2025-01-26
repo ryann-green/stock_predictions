@@ -5,6 +5,8 @@ import warnings
 import time
 from build_results import increment_results
 
+from aggregate_data import rank_data
+
 warnings.filterwarnings("ignore")
 
 
@@ -103,6 +105,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
         
         return {
             "ticker": ticker,
+            
             "pred_date": last_date,
             "overall_success_rate": overall_success_rate,
             "predicted_higher_success_rate": predicted_higher_success_rate,
@@ -181,7 +184,7 @@ def process_stocks(stocks_data, historical_data):
     return results,non_triggers
 
 # Main execution
-if __name__ == "__main__":
+# if __name__ == "__main__":
     historical_data = fetch_historical_data(stocks_data)
     processed_results,non_triggers = process_stocks(stocks_data, historical_data)
     # print(processed_results)
@@ -195,3 +198,8 @@ if __name__ == "__main__":
     # will need to add a clause that ignores ticker from X period in the past
     non_triggers_df=pd.DataFrame(non_triggers)
     non_triggers_df.to_csv('predictions/non_trigger_stocks.csv') 
+    
+    # perform the ranking after  backtesting is finished
+    rank_data()
+    
+    

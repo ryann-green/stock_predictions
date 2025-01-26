@@ -2,6 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from data_loader import load_data
 
+
 # Load data
 br_df,p_df,recs_df = load_data()
 
@@ -74,7 +75,8 @@ def create_filtered_table(df):
             dcc.Dropdown(
                 id="ticker-filter",
                 options=[{"label": ticker, "value": ticker} for ticker in df["ticker"].unique()],
-                value=df["ticker"].unique()[0],
+                # value=df["ticker"].unique()[0],
+                value=" ",
                 clearable=True,
                 className="mb-3",
             ),

@@ -9,13 +9,15 @@ from data_loader import load_data  # Import here once
 br_df, p_df, recs_df = load_data()
 
 def register_callbacks(app):
+    
+    
     @app.callback(
         Output("table-container", "children"),  # Use "children" for DataTable
         [Input("ticker-filter", "value")]
     )
     def update_table(selected_ticker):
         # Filter the globally loaded data
-        filtered_df = br_df[br_df["ticker"] == selected_ticker]
+        filtered_df = br_df[br_df["ticker"] == selected_ticker].sort_values('pred_date',ascending=False)
         
         # Return a DataTable instead of raw data
         return DataTable(
@@ -67,6 +69,7 @@ def register_callbacks(app):
     
     @app.callback(
         Output("ranked-container", "children"),
+         Output("ticker-filter", "value"),
         [
             Input("weight-median-profit", "value"),
             Input("weight-success-ratio", "value"),
@@ -75,6 +78,15 @@ def register_callbacks(app):
             Input("weight-predictions", "value"),
         ],
     )
+    
+    # def update_filter_ticker(ticker):
+    #     @app.callback(
+    #         Output("ticker-filter", "value"),  # Use "children" for DataTable
+    #         [Input( ticker)])
+        
+    #     def return_ticker ():
+    #         return ticker
+    
     def update_rankings(w_median, w_success, w_spread, w_non_trigger, w_predictions):
         # Normalize weights to sum to 1
         total_weight = w_median + w_success + w_spread + w_non_trigger + w_predictions
@@ -87,23 +99,46 @@ def register_callbacks(app):
         }
 
         # Calculate weighted rankings
-        recs_df["weighted_rank"] = (
+        recs_df["weighted_rank"] = round((
             recs_df["14_day_median_profit_rank"] * normalized_weights["14_day_median_profit_rank"]
             + recs_df["success_ratio_rank"] * normalized_weights["success_ratio_rank"]
             + recs_df["spread_rank"] * normalized_weights["spread_rank"]
             + recs_df["non_trigger_rank"] * normalized_weights["non_trigger_rank"]
             + recs_df["predictions_rank"] * normalized_weights["predictions_rank"]
-        )
+        ))
         ranked_df = recs_df.sort_values(by="weighted_rank",ascending=False).reset_index(drop=True)
 
+        formatted_ranked_df=ranked_df[['ticker'
+                              ,'weighted_rank'
+                              ,'14_day_median_profit_rank'
+                              ,'success_ratio_rank'
+                              ,'spread_rank'
+                              ,'non_trigger_rank'
+                              ,'predictions_rank']]
+        
+        
+        # def update_filter_ticker(ticker):
+        #     @app.callback(
+        #         Output("ticker-filter", "value"),  # Use "children" for DataTable
+        #         [Input( ticker)])
+            
+        #     def return_ticker ():
+                
+        first_ticker=formatted_ranked_df["ticker"].unique()[0]
+
+                
+        
+        # update_filter_ticker(first_ticker)
+        
         # Return the updated table
         return DataTable(
             id="ranked-table",
             columns=[
-                {"name": col, "id": col} for col in ranked_df.columns
+                {"name": col, "id": col} for col in formatted_ranked_df.columns
             ],
-            data=ranked_df.to_dict("records"),
+            data=formatted_ranked_df.to_dict("records"),
             sort_action="native",
             page_action="native",
             page_size=10,
-        )
+
+        ), first_ticker
