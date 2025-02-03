@@ -2,6 +2,9 @@ from dash import Input, Output, dcc
 import dash_bootstrap_components as dbc
 from dash.dash_table import DataTable
 from data_loader import load_data  # Import here once
+from dash.dependencies import Input, Output, State
+import plotly.express as px
+
 
 # Load the data globally
 # br_df = backtesting results
@@ -13,19 +16,75 @@ def register_callbacks(app):
     
     @app.callback(
         Output("table-container", "children"),  # Use "children" for DataTable
+        Output("column-container", "children"),
+         Output("line-container", "children"),
         [Input("ticker-filter", "value")]
     )
     def update_table(selected_ticker):
         # Filter the globally loaded data
         filtered_df = br_df[br_df["ticker"] == selected_ticker].sort_values('pred_date',ascending=False)
         
+        filtered_df.rename(columns={'ticker': 'Ticker'
+                                            , 'pred_date': 'Prediction Date'
+                                            , 'overall_success_rate': 'OSR'
+                                            ,'predicted_higher_success_rate': 'PHSR'
+                                            , 'predicted_price_higher': 'Predicted Higher?'
+                                            , 'first_trigger': 'Trigger'
+                                            ,'first_trigger_date': 'Trigger Date'
+                                            , 'first_trigger_price': 'Trigger Price'
+                                            , 'profit_per_stock': '$ Gain/Loss'
+                                            , 'profit_pct_per_stock': '% Gain/Loss'}
+                                   , inplace=True)
+        
+        pass_through_df=filtered_df[['Prediction Date'
+                                     ,'OSR'
+                                     ,'PHSR'
+                                     ,'Predicted Higher?'
+                                     ,'Trigger'
+                                     ,'Trigger Date'
+                                     ,'Trigger Price'
+                                     ,'$ Gain/Loss'
+                                     ,'% Gain/Loss']]
+        
+        # sum_gain=pass_through_df.groupby('Trigger').sum('$ Gain/Loss')
+        graph_df= filtered_df[filtered_df["Predicted Higher?"] == True]
+        bar_df=graph_df.groupby('Trigger', as_index=False).sum('$ Gain/Loss')
+        
+        col = px.bar(
+                bar_df,
+                x="Trigger",
+                y="$ Gain/Loss",
+                color="Trigger",
+                title=f"Amount Gained vs Lost by {selected_ticker}",
+                # labels={"14_day_median_profit": "Median Profit (%)"},
+            )
+            
+        col.update_layout(
+            margin=dict(l=20, r=20, t=40, b=20),
+            height=300,  # Adjust height for stacking
+        )
+        
+        line = px.line(
+            graph_df,
+            x="Prediction Date",
+            y="% Gain/Loss",
+            # color="Ticker",
+            title=f"% Gain/Loss Over Time for {selected_ticker}",
+            # labels={"rank_score": "Ranking Score", "last_date_for_prediction": "Date"},
+        )
+
+        line.update_layout(
+            margin=dict(l=20, r=20, t=40, b=20),
+            height=300,  # Adjust height for stacking
+        )
+        
         # Return a DataTable instead of raw data
         return DataTable(
             id="data-table",
             columns=[
-                {"name": col, "id": col, "hideable": True} for col in filtered_df.columns
+                {"name": col, "id": col, "hideable": True} for col in pass_through_df.columns
             ],
-            data=filtered_df.to_dict("records"),
+            data=pass_through_df.to_dict("records"),
             sort_action="native",
             filter_action="native",
             page_action="native",
@@ -40,14 +99,13 @@ def register_callbacks(app):
                 "backgroundColor": "rgb(230, 230, 230)",
                 "fontWeight": "bold",
             },
-        )
+        ), dcc.Graph(figure=col), dcc.Graph(figure=line)
     
     @app.callback(
         Output("scatter-container", "children"),  # Use "children" for dcc.Graph
         [Input("date-filter", "value")]
     )
     def update_scatter(selected_date):
-        import plotly.express as px
 
         # Filter the globally loaded data
         filtered_df = p_df[p_df["last_date_for_prediction"] == selected_date]
@@ -109,13 +167,24 @@ def register_callbacks(app):
         ranked_df = recs_df.sort_values(by="weighted_rank",ascending=False).reset_index(drop=True)
 
         formatted_ranked_df=ranked_df[['ticker'
-                              ,'weighted_rank'
-                              ,'14_day_median_profit_rank'
-                              ,'success_ratio_rank'
-                              ,'spread_rank'
-                              ,'non_trigger_rank'
-                              ,'predictions_rank']]
-        
+                            , 'last_date_for_prediction'
+                            ,'weighted_rank'
+                            #   ,'14_day_median_profit_rank'
+                            #   ,'success_ratio_rank'
+                            #   ,'spread_rank'
+                            #   ,'non_trigger_rank'
+                            #   ,'predictions_rank'
+                              ,'latest_close'
+                              ,'stop_loss_amt'
+                              ,'adj_prediction_price_w_high_inc']]
+        formatted_ranked_df.iloc[:, -3:] = formatted_ranked_df.iloc[:, -3:].round(2)
+        formatted_ranked_df.rename(columns={'ticker': 'Ticker'
+                                            , 'last_date_for_prediction': 'Prediction Date'
+                                            , 'weighted_rank': 'Rank'
+                                            ,'latest_close': 'Close'
+                                            , 'stop_loss_amt': 'Stop-Loss'
+                                            , 'adj_prediction_price_w_high_inc': 'Prediction Price'}
+                                   , inplace=True)
         
         # def update_filter_ticker(ticker):
         #     @app.callback(
@@ -124,7 +193,7 @@ def register_callbacks(app):
             
         #     def return_ticker ():
                 
-        first_ticker=formatted_ranked_df["ticker"].unique()[0]
+        first_ticker=formatted_ranked_df["Ticker"].unique()[0]
 
                 
         
@@ -139,6 +208,62 @@ def register_callbacks(app):
             data=formatted_ranked_df.to_dict("records"),
             sort_action="native",
             page_action="native",
-            page_size=10,
+            page_size=15,
+            style_table={
+                "overflowX": "auto",
+                "maxHeight": "500px",
+                "overflowY": "auto",
+            },
+            style_cell={"textAlign": "center", "padding": "5px"},
+            style_data={
+            'color': 'black',
+            'backgroundColor': 'white'
+            },
+            style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(220, 220, 220)',
+            }
+            ],
+            style_header={
+                'backgroundColor': 'rgb(210, 210, 210)',
+                'color': 'black',
+                'fontWeight': 'bold'
+            }
 
         ), first_ticker
+        
+    # Callbacks to toggle collapsible sections
+    @app.callback(
+        Output("ranking-collapse", "is_open"),
+        Input("ranking-button", "n_clicks"),
+        State("ranking-collapse", "is_open"),
+        prevent_initial_call=True
+    )
+    def toggle_ranking(n_clicks, is_open):
+        return not is_open  # Toggle between open and closed
+
+    @app.callback(
+        Output("features-collapse", "is_open"),
+        Input("features-button", "n_clicks"),
+        State("features-collapse", "is_open"),
+        prevent_initial_call=True
+    )
+    def toggle_features(n_clicks, is_open):
+        return not is_open  # Toggle between open and closed
+    
+    @app.callback(
+    Output("weight-alert", "is_open"),
+    [
+        Input("weight-median-profit", "value"),
+        Input("weight-success-ratio", "value"),
+        Input("weight-spread", "value"),
+        Input("weight-non-trigger", "value"),
+        Input("weight-predictions", "value"),
+    ]
+    )
+    def validate_weights(median_profit, success_ratio, spread, non_trigger, predictions):
+        total_weight = median_profit + success_ratio + spread + non_trigger + predictions
+        return total_weight != 100  # Show alert if total is not 100
+
+        

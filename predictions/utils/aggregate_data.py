@@ -90,7 +90,7 @@ def rank_data():
     pivot_data = aggregated_data.pivot(index='timeframe', columns='ticker', values='median_profit_pct')
     # Save the processed data for visualization
     # pivot_data.to_csv('rankings/median_profit_pct.csv')
-    # aggregated_data.to_csv('rankings/median_profit_pct.csv')
+    aggregated_data.to_csv('rankings/median_profit_pct.csv')
 
     print(pivot_data.to_csv('rankings/median_profit_bell_pivot.csv'))
     print("Data formatted and saved for visualization. File: formatted_data_with_success_ratio.csv")
@@ -129,13 +129,17 @@ def rank_data():
     # Filter to only include rows where predicted_price_higher is True
     filtered_predictions_data = predictions[(predictions['last_date_for_prediction'] == max_prediction_date) & (predictions['adj_prediction_higher'] == True)].copy()
     max_prediction_date=max(predictions['last_date_for_prediction'])
-    filtered_predictions_df=filtered_predictions_data[['ticker','last_date_for_prediction','predicted_higher_success_rate','overall_success_rate']]
+    filtered_predictions_df=filtered_predictions_data[['ticker','last_date_for_prediction','predicted_higher_success_rate','overall_success_rate','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
     filtered_predictions_df['ranking_mix']=filtered_predictions_df['predicted_higher_success_rate']*.75+filtered_predictions_df['overall_success_rate']*.25
-    filtered_predictions_df_clean=filtered_predictions_df[['ticker','last_date_for_prediction','ranking_mix']]
+    filtered_predictions_df_clean=filtered_predictions_df[['ticker','last_date_for_prediction','ranking_mix','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
 
     merged_df=pd.merge(merged_df, filtered_predictions_df_clean, on='ticker',how='left').dropna()
     merged_df['predictions_rank']=merged_df['ranking_mix'].rank(ascending=True, method='min').astype(int)
 
 
-    final_rankng=merged_df.dropna()[['ticker','14_day_median_profit_rank','success_ratio_rank','spread_rank','non_trigger_rank','predictions_rank']]
-    final_rankng.to_csv('rankings/latest_recs.csv')
+    final_ranking=merged_df.dropna()[['ticker','last_date_for_prediction','14_day_median_profit_rank','success_ratio_rank','spread_rank','non_trigger_rank','predictions_rank','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
+    final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
+
+    final_ranking.to_csv('rankings/latest_recs.csv')
+    
+rank_data()

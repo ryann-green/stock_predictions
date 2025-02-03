@@ -4,7 +4,7 @@ from layout import create_layout
 from callbacks import register_callbacks
 
 # Initialize the Dash app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],title="SignalXplnd")
 
 # Set app layout
 app.layout = create_layout()

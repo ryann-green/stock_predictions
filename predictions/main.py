@@ -73,6 +73,8 @@ for date in missing_dates:
     # Fetching historical data for GOOG
     tickers = ['AAPL'
             ,'GOOG'
+            ,'SAN'
+            ,'BGC'
             ,'DRI'
             ,'PAYX'
             ,'SBUX'

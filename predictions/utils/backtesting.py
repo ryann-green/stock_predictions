@@ -184,7 +184,7 @@ def process_stocks(stocks_data, historical_data):
     return results,non_triggers
 
 # Main execution
-# if __name__ == "__main__":
+if __name__ == "__main__":
     historical_data = fetch_historical_data(stocks_data)
     processed_results,non_triggers = process_stocks(stocks_data, historical_data)
     # print(processed_results)
