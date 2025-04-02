@@ -4,6 +4,7 @@ import pandas as pd
 import warnings
 import time
 from build_results import increment_results
+from data_transfer import read_from_s3
 
 from aggregate_data import rank_data
 
@@ -190,7 +191,7 @@ if __name__ == "__main__":
     processed_results,non_triggers = process_stocks(stocks_data, historical_data)
     # print(processed_results)
     results_df = pd.DataFrame(processed_results)
-    increment_results('predictions/backtest_results.csv',processed_results)
+    increment_results(read_from_s3('backtest_results.csv'),processed_results)
     # print(results_df)
     # results_df.to_csv('summary_results.csv', index=False)
     

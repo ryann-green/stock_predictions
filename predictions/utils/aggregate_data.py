@@ -1,4 +1,5 @@
 import dagster as dg
+from data_transfer import read_from_s3,write_to_s3
 
 @dg.asset
 def rank_data():
@@ -9,9 +10,8 @@ def rank_data():
 
     warnings.filterwarnings('ignore')
 
-    # Load the dataset
-    file_path = 'predictions/backtest_results.csv'
-    data = pd.read_csv(file_path)
+    # Load the backtesting dataset
+    data = read_from_s3('backtest_results.csv')
 
     # Filter to only include rows where predicted_price_higher is True
     filtered_data = data[data['predicted_price_higher'] == True].copy()
@@ -125,9 +125,7 @@ def rank_data():
     # print(merged_df.sort_values('non_trigger_rank',ascending=False))
 
     # Prepare for latest_prediction rank calc
-
-    file_path = 'predictions/predictions_table.csv'
-    predictions = pd.read_csv(file_path)
+    predictions = read_from_s3('predictions_table.csv')
     max_prediction_date=max(predictions['last_date_for_prediction'])
     # Filter to only include rows where predicted_price_higher is True
     filtered_predictions_data = predictions[(predictions['last_date_for_prediction'] == max_prediction_date) & (predictions['adj_prediction_higher'] == True)].copy()
@@ -143,7 +141,7 @@ def rank_data():
     final_ranking=merged_df.dropna()[['ticker','last_date_for_prediction','14_day_median_profit_rank','success_ratio_rank','spread_rank','non_trigger_rank','predictions_rank','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
 
-    final_ranking.to_csv('rankings/latest_recs.csv')
+    write_to_s3(final_ranking,'latest_recs.csv')
 ## This allows Dagster to manage the assets' execution and dependencies
 # defs = dg.Definitions(assets=[rank_data])
 # rank_data()

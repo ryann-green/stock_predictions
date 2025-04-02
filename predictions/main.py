@@ -21,6 +21,7 @@ from utils.generate_features import generate_lead_features
 from utils.train_data import prep_train_test_data
 from utils.model_evaluation import evaluate_models
 from utils.build_results import increment_predictions, increment_non_trigger_evals
+from utils.data_transfer import read_from_s3,write_to_s3
  
 
 # Steps to operationalize
@@ -341,7 +342,7 @@ for date in missing_dates:
     
     # total_results.append(all_results)
     
-    increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/predictions_table.csv')
+    increment_predictions(f'10_day_ahead_close/stock_performance/{date}/tickers',read_from_s3('predictions_table.csv'))
    
     increment_non_trigger_evals(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/non_trigger_stocks.csv')
     

@@ -1,8 +1,8 @@
 import pandas as pd
-
+from data_transfer import read_from_s3,write_to_s3
 
 # Load the data into a DataFrame (replace 'your_file.csv' with your actual file path)
-df = pd.read_csv('predictions/predictions_table.csv')
+df = read_from_s3('predictions_table.csv')
 
 # Define the columns to check for anomalies
 anomaly_columns = ['adj_prediction_price_w_high_inc', 'adj_prediction_price', 'prediction_price']
@@ -24,6 +24,6 @@ cleaned_df = remove_anomalies_rowwise(df, anomaly_columns, 'latest_close')
 cleaned_df = cleaned_df.drop_duplicates(subset=['ticker', 'last_date_for_prediction'], keep='first')
 
 # Save the cleaned data to a new CSV file
-cleaned_df.to_csv('predictions/predictions_table.csv', index=False)
+write_to_s3(cleaned_df,'predictions_table.csv')
 
 print("Anomalies removed. Cleaned data saved to 'predictions_table.csv'.")

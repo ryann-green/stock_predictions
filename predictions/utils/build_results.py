@@ -5,9 +5,10 @@ import pandas as pd
 # from utils.g_sheet import get_credentials, add_sheet_data,delete_sheet_data
 import gspread
 import dagster as dg
+from data_transfer import write_to_s3
 
 # when I build other models, I can reuse this function to build the aggregated predictions for that model
-@dg.asset
+# @dg.asset
 def build_predictions(target):
     
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
@@ -43,18 +44,17 @@ def build_predictions(target):
                             print(f"Error reading {file_path}: {e}")
 
     # Save the final combined table to a file (optional)
-        
-    final_table.to_csv('predictions_table.csv')
+    write_to_s3(final_table,'predictions_table.csv')
 
     return final_table 
 
 # each time predictions the script is ran, need to add the results to the summary.csv file
-@dg.asset
+# @dg.asset
 def increment_predictions(target,table):
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
     
     #get the DataFrame of the file that I want to append the results to for the predictions
-    incremented_summary = pd.read_csv(table)[['ticker'
+    incremented_summary = table[['ticker'
                                               ,'total_predictions'
                                               ,'total_correct_predicions'
                                               ,'overall_success_rate'
@@ -133,7 +133,7 @@ def increment_predictions(target,table):
                         print(f"All results not in file path")
    
 # run this everytime the predictions script is ran to add on to non_trigger_stocks for new predictions
-@dg.asset
+# @dg.asset
 def increment_non_trigger_evals (target,table):
     print('Running increment_non_trigger_evals function')
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
@@ -244,16 +244,16 @@ def increment_results(old_results_path,new_results):
     print('Running increment_results function')
     print('Incrementing Backtesting Results')
     print('Retrieving existing backtesting results')
-    old_backtest_results=pd.read_csv(old_results_path)[['ticker'
-                                                        ,'pred_date'
-                                                        ,'overall_success_rate'
-                                                        ,'predicted_higher_success_rate'
-                                                        ,'predicted_price_higher'
-                                                        ,'first_trigger'
-                                                        ,'first_trigger_date'
-                                                        ,'first_trigger_price'
-                                                        ,'profit_per_stock'
-                                                        ,'profit_pct_per_stock']]
+    old_backtest_results=old_results_path[['ticker'
+                                            ,'pred_date'
+                                            ,'overall_success_rate'
+                                            ,'predicted_higher_success_rate'
+                                            ,'predicted_price_higher'
+                                            ,'first_trigger'
+                                            ,'first_trigger_date'
+                                            ,'first_trigger_price'
+                                            ,'profit_per_stock'
+                                            ,'profit_pct_per_stock']]
     # old_max_date=max(old_backtest_results['pred_date'])
     print(old_backtest_results)
     
@@ -270,7 +270,7 @@ def increment_results(old_results_path,new_results):
     print(f"Length of new data: {len(new_backtest_results)}")
     print(f"Length of combined data after concat {len(pd.concat([old_backtest_results,new_backtest_results]))}")
     
-    pd.concat([old_backtest_results,new_backtest_results]).to_csv(old_results_path)
+    write_to_s3(pd.concat([old_backtest_results,new_backtest_results]),'backtest_results.csv')
     
     return 'incremented_results'
 
@@ -363,10 +363,4 @@ def delete_sheet_data(client,spreadsheet_name):
 
 # using for testing functions
 if __name__ == "__main__":
-#     # predictions_table = build_predictions('10_day_ahead_close/stock_performance')
-#     # increment_non_trigger_evals('10_day_ahead_close/stock_performance/2024-12-05/tickers','predictions_table.csv')
-
-#     # print(pd.read_csv('predictions/non_trigger_stocks.csv'))
-#     incremented_table = increment_non_trigger_evals('10_day_ahead_close/stock_performance/2025-01-04/tickers','predictions/non_trigger_stocks.csv')
-    # increment_results('predictions/backtest_results.csv')
     print('Hi')
