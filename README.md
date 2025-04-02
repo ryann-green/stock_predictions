@@ -4,6 +4,16 @@ This repository contains scripts for a **Stock Prediction App** designed to pred
 
 ---
 
+## Process
+
+## backend
+1. main.py - gets the tickers, historical data, and performs ml
+2. backtesting.py --performs backtests to evaluate performance
+3. aggregate_data.py --aggregates results and contains ranking algorithm for future predictions
+
+## frontend
+1. signalxplnd-app - displays ranking results from back-end
+
 ## Features
 
 1. **Data Fetching and Preprocessing**:

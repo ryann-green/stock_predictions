@@ -1,7 +1,7 @@
 from dash import Input, Output, dcc
 import dash_bootstrap_components as dbc
 from dash.dash_table import DataTable
-from data_loader import load_data  # Import here once
+from data_loader import load_data  
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 
@@ -45,6 +45,14 @@ def register_callbacks(app):
                                      ,'Trigger Price'
                                      ,'$ Gain/Loss'
                                      ,'% Gain/Loss']]
+        
+        pass_through_df.iloc[:, 1] = pass_through_df.iloc[:, 1].round(2)
+        pass_through_df.iloc[:, 2] = pass_through_df.iloc[:, 2].round(2)
+        pass_through_df.iloc[:, 6] = pass_through_df.iloc[:, 6].round(2)
+        pass_through_df.iloc[:, 7] = pass_through_df.iloc[:, 7].round(2)
+        pass_through_df.iloc[:, 8] = pass_through_df.iloc[:, 8].round(2)
+
+
         
         # sum_gain=pass_through_df.groupby('Trigger').sum('$ Gain/Loss')
         graph_df= filtered_df[filtered_df["Predicted Higher?"] == True]
@@ -91,14 +99,26 @@ def register_callbacks(app):
             page_size=10,  # Show 10 rows per page
             style_table={
                 "overflowX": "auto",
-                "maxHeight": "400px",
+                "maxHeight": "500px",
                 "overflowY": "auto",
             },
-            style_cell={"textAlign": "left", "padding": "5px"},
-            style_header={
-                "backgroundColor": "rgb(230, 230, 230)",
-                "fontWeight": "bold",
+            style_cell={"textAlign": "center", "padding": "5px"},
+            style_data={
+            'color': 'black',
+            'backgroundColor': 'white'
             },
+            style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(220, 220, 220)',
+            }
+            ],
+            style_header={
+                'backgroundColor': 'rgb(210, 210, 210)',
+                'color': 'black',
+                'fontWeight': 'bold'
+            }
+
         ), dcc.Graph(figure=col), dcc.Graph(figure=line)
     
     @app.callback(

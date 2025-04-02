@@ -31,7 +31,7 @@ def fetch_historical_data(stocks_data):
     print("Fetching historical data for all tickers...")
     all_data=[]
     for ticker in tickers:
-        data = yf.download(ticker, start=start_date, end=end_date, group_by='ticker', progress=False)
+        data = yf.download(ticker, start=start_date, end=end_date, group_by='ticker', progress=False,multi_level_index=False)
         data['ticker']=ticker
         all_data.append(data)
         # print(all_data)
@@ -49,6 +49,7 @@ def check_first_trigger(historical_data, ticker, buy_price, overall_success_rate
     pd.to_datetime(historical_data.reset_index()['Date'],format='%Y-%m-%d').dt.date
     
     h_data=historical_data.reset_index()
+    # print(h_data.columns.droplevel(1))
     
     # Find dates for triggers
     # print(ticker)

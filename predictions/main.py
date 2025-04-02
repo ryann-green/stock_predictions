@@ -11,6 +11,7 @@ from sklearn.metrics import mean_squared_error
 from xgboost import XGBRegressor
 import numpy as np
 import pandas as pd
+import dagster as dg
 
 # custom libraries
 from utils.get_missing_dates import get_missing_dates
@@ -20,7 +21,7 @@ from utils.generate_features import generate_lead_features
 from utils.train_data import prep_train_test_data
 from utils.model_evaluation import evaluate_models
 from utils.build_results import increment_predictions, increment_non_trigger_evals
-
+ 
 
 # Steps to operationalize
 # Identify the ideal buying price that is just not the last closing wprice to optimize profit
@@ -42,11 +43,12 @@ from utils.build_results import increment_predictions, increment_non_trigger_eva
 # dates=pd.read_csv('./working_weekdays_2024.csv')
 
 missing_dates=get_missing_dates()
+# missing_dates=['2025-02-17']
 
-print(missing_dates)
+# print(missing_dates)
 
 total_results=[]
-  
+
 for date in missing_dates:
     
     # Get the current date in YYYY-MM-DD format
@@ -55,7 +57,7 @@ for date in missing_dates:
     # year = date[1]['year']
     # month = date[1]['month'] 
     # day = date[1]['day']
-    print(current_date)
+    # print(current_date)
 
 
     # Define the path to the new folder within the home directory
@@ -74,7 +76,7 @@ for date in missing_dates:
     tickers = ['AAPL'
             ,'GOOG'
             ,'SAN'
-            ,'BGC'
+            # ,'BGC'
             ,'DRI'
             ,'PAYX'
             ,'SBUX'
@@ -140,176 +142,196 @@ for date in missing_dates:
     completed=[]
         
     for ticker in tickers:
-        
-        if ticker not in completed:
-            completed.append(ticker)
-        
-            # print(ticker)
+        try: 
+            if ticker not in completed:
+                completed.append(ticker)
             
-            data= shift_ahead (
-                    get_initial_df(ticker,start_date,end_date)
-                    ,days_ahead
-                    )
-
-            lead_features_df=pd.concat(generate_lead_features(data,days_ahead), axis=1)
-
-            # print(lead_features_df)
-            data = pd.concat([data, lead_features_df], axis=1)
-            
-            data.dropna(inplace=True)
-            
-            # print(data)
-
-            # Make a copy of the dataset before adding the column needed for a target for the closing price 30 days in the future for training the model
-            train_data=data.iloc[:-1]
-            full=data.copy()
-            # print(train_data)
-
-            # # Create target column by shifting the close price by -target days (closing price from target days in the future)
-            data[f'Close_{days_ahead}d_ahead'] = data['Close'].shift(-days_ahead)
-
-            # print(data)
-            
-            # this will get rid of the data form the last 30 trading days to train the model
-            data.dropna(inplace=True)
-
-            # identify target column
-            target_col = f'Close_{days_ahead}d_ahead'
-            
-            # Define feature columns (past target days of technical indicators)
-            feature_cols = lead_features_df.columns.tolist()
-            
-            # print(feature_cols)
-            
-            # get the main columns for the current day that aren't shifted. These need to be included to gauge the latest days information to include in the model
-            # main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Stochastic_RSI','Williams_%R','ROC']
-            main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Williams_%R','ROC']
-            for col in main_cols:
-                feature_cols.append(col)
-            
-            X_train_selected_df,X_test_selected_df,y_train,y_test,selected_feature_names =prep_train_test_data(data,feature_cols,target_col)
-
-            # # # List of models to train
-            models = {
-                'RandomForest': RandomForestRegressor(n_estimators=100, random_state=42),
-                'LinearRegression': LinearRegression(),
-                'XGBoost': XGBRegressor(objective='reg:squarederror', random_state=42),
-                'GradientBoosting': GradientBoostingRegressor(random_state=42)
-            }
-            
-            # # # Evaluate the model's predicted values vs the actual values for past predictions
-            predictions_df = data.copy()
-            results,predictions_df=evaluate_models(models.items()
-                                                   ,days_ahead
-                                                   ,X_train_selected_df
-                                                   ,X_test_selected_df
-                                                   ,y_train
-                                                   ,y_test
-                                                   ,predictions_df)
+                print(ticker)
                 
-            # # Select the best model
-            best_model_name = min(results, key=results.get)
-            best_model = models[best_model_name]
+                data= shift_ahead (
+                        get_initial_df(ticker,start_date,end_date)
+                        ,days_ahead
+                        )
+                
 
-            # print(f'\nBest model: {best_model_name} with RMSE: {results[best_model_name]}')
+                lead_features_df=pd.concat(generate_lead_features(data,days_ahead), axis=1)
+                # print(lead_features_df)
+
+                # print(lead_features_df)
+                # print(pd.concat([data, lead_features_df]))
+                # print(data.columns)
+                # print(lead_features_df.columns)
+
+                data = pd.concat([data, lead_features_df], axis=1)
+                
+                # print('hi')
+
+
+                data.dropna(inplace=True)
             
-            evaluation_df=predictions_df[['Close',target_col, f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']]
+                
+                # print(data)
 
-            # # Drop rows with NaN values before calculating RMSE
-            evaluation_df = evaluation_df.dropna()
-            evaluation_df['Actual_vs_Predicted_Diff %'] = (evaluation_df[target_col] - evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead'])/evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']
-            evaluation_rmse = np.sqrt(mean_squared_error(evaluation_df[target_col], evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']))
-           
+                # Make a copy of the dataset before adding the column needed for a target for the closing price 30 days in the future for training the model
+                train_data=data.iloc[:-1]
+                full=data.copy()
 
-            # Adding columns to indicate if the predicted close is higher and if the actual future close is higher
-            evaluation_df['Predicted_Higher'] = evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead'] > evaluation_df['Close']
-            evaluation_df['Actual_Higher'] = evaluation_df[target_col] > evaluation_df['Close']
+                # print(train_data)
 
-            # Adding column to indicate if the model's prediction was correct
-            evaluation_df['Prediction_Correct'] = evaluation_df['Predicted_Higher'] == evaluation_df['Actual_Higher']
+                # # Create target column by shifting the close price by -target days (closing price from target days in the future)
+                data[f'Close_{days_ahead}d_ahead'] = data['Close'].shift(-days_ahead)
+
+                # print(data)
+                
+                # this will get rid of the data form the last 30 trading days to train the model
+                data.dropna(inplace=True)
+                
+
+
+                # identify target column
+                target_col = f'Close_{days_ahead}d_ahead'
+                
+                # Define feature columns (past target days of technical indicators)
+                feature_cols = lead_features_df.columns.tolist()
+                print(feature_cols)
+                
+                
+                # get the main columns for the current day that aren't shifted. These need to be included to gauge the latest days information to include in the model
+                # main_cols=['Open','High','Low','Close','Adj Close','Volume','ALMA','Stochastic_RSI','Williams_%R','ROC']
+                main_cols=['Open','High','Low','Close','Volume','ALMA','Williams_%R','ROC']
+                for col in main_cols:
+                    feature_cols.append(col)
+                    
+
+                    
+                X_train_selected_df,X_test_selected_df,y_train,y_test,selected_feature_names =prep_train_test_data(data,feature_cols,target_col)
+
+                # # # List of models to train
+                models = {
+                    'RandomForest': RandomForestRegressor(n_estimators=100, random_state=42),
+                    'LinearRegression': LinearRegression(),
+                    'XGBoost': XGBRegressor(objective='reg:squarederror', random_state=42),
+                    'GradientBoosting': GradientBoostingRegressor(random_state=42)
+                }
+                
+                # # # Evaluate the model's predicted values vs the actual values for past predictions
+                predictions_df = data.copy()
+                print(predictions_df)
+                results,predictions_df=evaluate_models(models.items()
+                                                    ,days_ahead
+                                                    ,X_train_selected_df
+                                                    ,X_test_selected_df
+                                                    ,y_train
+                                                    ,y_test
+                                                    ,predictions_df)
+                    
+                # # Select the best model
+                best_model_name = min(results, key=results.get)
+                best_model = models[best_model_name]
+
+                # print(f'\nBest model: {best_model_name} with RMSE: {results[best_model_name]}')
+                
+                evaluation_df=predictions_df[['Close',target_col, f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']]
+                # print(evaluation_df)
+                # # Drop rows with NaN values before calculating RMSE
+                evaluation_df = evaluation_df.dropna()
+                evaluation_df['Actual_vs_Predicted_Diff %'] = (evaluation_df[target_col] - evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead'])/evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']
+                evaluation_rmse = np.sqrt(mean_squared_error(evaluation_df[target_col], evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead']))
             
-            evaluation_df['ticker']=ticker
 
-            # print(evaluation_df)
+                # Adding columns to indicate if the predicted close is higher and if the actual future close is higher
+                evaluation_df['Predicted_Higher'] = evaluation_df[f'{best_model_name}_Predicted_Close_{days_ahead}d_ahead'] > evaluation_df['Close']
+                evaluation_df['Actual_Higher'] = evaluation_df[target_col] > evaluation_df['Close']
 
-            # Aggregating the data
-            total_predictions = len(evaluation_df)
-            total_correct_predictions = evaluation_df['Prediction_Correct'].sum()
-            predicted_higher_correct = evaluation_df[evaluation_df['Predicted_Higher'] & evaluation_df['Prediction_Correct']].shape[0]
-            total_predicted_higher = evaluation_df['Predicted_Higher'].sum()
-            average_act_vs_pred_diff=evaluation_df['Actual_vs_Predicted_Diff %'].mean()
-            median_act_vs_pred_diff=evaluation_df['Actual_vs_Predicted_Diff %'].median()
+                # Adding column to indicate if the model's prediction was correct
+                evaluation_df['Prediction_Correct'] = evaluation_df['Predicted_Higher'] == evaluation_df['Actual_Higher']
+                
+                evaluation_df['ticker']=ticker
 
-            # Calculating success rates
-            overall_success_rate = total_correct_predictions / total_predictions
-            predicted_higher_success_rate = predicted_higher_correct / total_predicted_higher if total_predicted_higher != 0 else 0
+                # print(evaluation_df)
 
-            pred_results={}
-            pred_results['ticker']=ticker
-            pred_results['total_predictions']=total_predictions
-            pred_results['total_correct_predicions']=total_correct_predictions
-            pred_results['overall_success_rate']=overall_success_rate
-            pred_results['predicted_higher_correct']=predicted_higher_correct
-            pred_results['total_predicted_higher']=total_predicted_higher
-            pred_results['predicted_higher_success_rate']=predicted_higher_success_rate
-            # pred_results['average_act_vs_pred_diff']=average_act_vs_pred_diff
-            # pred_results['median_act_vs_pred_diff']=median_act_vs_pred_diff
-            pred_results['adj_sell_vs_pred_pct']=(average_act_vs_pred_diff+median_act_vs_pred_diff)/2
-            
-            last_row = full.iloc[-1:]
-            pred_results['latest_close']=last_row['Close'][0]
+                # Aggregating the data
+                total_predictions = len(evaluation_df)
+                print(total_predictions)
+                total_correct_predictions = evaluation_df['Prediction_Correct'].sum()
+                predicted_higher_correct = evaluation_df[evaluation_df['Predicted_Higher'] & evaluation_df['Prediction_Correct']].shape[0]
+                total_predicted_higher = evaluation_df['Predicted_Higher'].sum()
+                average_act_vs_pred_diff=evaluation_df['Actual_vs_Predicted_Diff %'].mean()
+                median_act_vs_pred_diff=evaluation_df['Actual_vs_Predicted_Diff %'].median()
 
-            # Extract the features used for model training from the last row
-            # Ensure that `selected_feature_names` are the features selected during training
-            latest_features = last_row[selected_feature_names].values.reshape(1, -1)
+                # Calculating success rates
+                overall_success_rate = total_correct_predictions / total_predictions
+                print(predicted_higher_correct)
+                predicted_higher_success_rate = predicted_higher_correct / total_predicted_higher if total_predicted_higher != 0 else 0
+                print(predicted_higher_success_rate)
+                pred_results={}
+                pred_results['ticker']=ticker
+                pred_results['total_predictions']=total_predictions
+                pred_results['total_correct_predicions']=total_correct_predictions
+                pred_results['overall_success_rate']=overall_success_rate
+                pred_results['predicted_higher_correct']=predicted_higher_correct
+                pred_results['total_predicted_higher']=total_predicted_higher
+                pred_results['predicted_higher_success_rate']=predicted_higher_success_rate
+                # pred_results['average_act_vs_pred_diff']=average_act_vs_pred_diff
+                # pred_results['median_act_vs_pred_diff']=median_act_vs_pred_diff
+                pred_results['adj_sell_vs_pred_pct']=(average_act_vs_pred_diff+median_act_vs_pred_diff)/2
+                
+                last_row = full.iloc[-1:]
+                pred_results['latest_close']=last_row['Close'][0]
 
-            # Step 2: Use the best model to predict the closing price 10 days in advance
-            # if ticker =='XLU':
-            #     print(latest_features)
-            predicted_price_10_days_ahead = best_model.predict(latest_features)[0]
+                # Extract the features used for model training from the last row
+                # Ensure that `selected_feature_names` are the features selected during training
+                latest_features = last_row[selected_feature_names].values.reshape(1, -1)
 
-            # Step 3: Output the prediction
-            pred_results['last_date_for_prediction']=last_row.index[0]
-            pred_results['prediction_price']=predicted_price_10_days_ahead
-            
-            adj_prediction_price=predicted_price_10_days_ahead*(1+(average_act_vs_pred_diff+median_act_vs_pred_diff)/2)
-            pred_results['adj_prediction_price']=adj_prediction_price
-            pred_results['adj_prediction_higher']=adj_prediction_price>last_row['Close'][0]
-            pred_results['stop_loss']=full['stop_loss'].min()
-            # print(f"Adj Price {adj_prediction_price}")
-            # print(f"Adj Price w/high {adj_prediction_price*(1+ data['close_high_avg'].max())}")
-            pred_results['adj_prediction_price_w_high_inc']=adj_prediction_price*(1+ data['close_high_avg'].max())
-            
-            # Output the results
-            # print(f"Total Predictions: {total_predictions}")
-            # print(f"Total Correct Predictions: {total_correct_predictions}")
-            # print(f"Overall Success Rate: {overall_success_rate:.2%}")
-            # print(f"Predicted Higher Correct: {predicted_higher_correct}")
-            # print(f"Total Predicted Higher: {total_predicted_higher}")
-            # print(f"Predicted Higher Success Rate: {predicted_higher_success_rate:.2%}")
-            # print(f"Predicted closing price 10 days ahead of {last_row.index[0]}: {predicted_price_10_days_ahead}")
-            # print(f"Adjusted Predicted closing price 10 days ahead of {last_row.index[0]}: {adj_prediction_price}")
-            
-            prediction_results.append(pred_results)
-            
-            new_folder_path = os.path.join(home_directory,str(current_date) ,'tickers')
+                # Step 2: Use the best model to predict the closing price 10 days in advance
+                # if ticker =='XLU':
+                #     print(latest_features)
+                predicted_price_10_days_ahead = best_model.predict(latest_features)[0]
 
-            # Create the folder if it doesn't already exist
-            if not os.path.exists(new_folder_path):
-                os.makedirs(new_folder_path)
-                print(f"Folder created: {new_folder_path}")
-            else:
-                pass
-                # print(f"Folder already exists: {new_folder_path}")
+                # Step 3: Output the prediction
+                pred_results['last_date_for_prediction']=last_row.index[0]
+                pred_results['prediction_price']=predicted_price_10_days_ahead
+                
+                adj_prediction_price=predicted_price_10_days_ahead*(1+(average_act_vs_pred_diff+median_act_vs_pred_diff)/2)
+                pred_results['adj_prediction_price']=adj_prediction_price
+                pred_results['adj_prediction_higher']=adj_prediction_price>last_row['Close'][0]
+                pred_results['stop_loss']=full['stop_loss'].min()
+                # print(f"Adj Price {adj_prediction_price}")
+                # print(f"Adj Price w/high {adj_prediction_price*(1+ data['close_high_avg'].max())}")
+                pred_results['adj_prediction_price_w_high_inc']=adj_prediction_price*(1+ data['close_high_avg'].max())
+                
+                # Output the results
+                # print(f"Total Predictions: {total_predictions}")
+                # print(f"Total Correct Predictions: {total_correct_predictions}")
+                # print(f"Overall Success Rate: {overall_success_rate:.2%}")
+                # print(f"Predicted Higher Correct: {predicted_higher_correct}")
+                # print(f"Total Predicted Higher: {total_predicted_higher}")
+                # print(f"Predicted Higher Success Rate: {predicted_higher_success_rate:.2%}")
+                # print(f"Predicted closing price 10 days ahead of {last_row.index[0]}: {predicted_price_10_days_ahead}")
+                # print(f"Adjusted Predicted closing price 10 days ahead of {last_row.index[0]}: {adj_prediction_price}")
+                
+                prediction_results.append(pred_results)
+                
+                new_folder_path = os.path.join(home_directory,str(current_date) ,'tickers')
 
-            # Saving the dataframe for future reference
-            evaluation_df.to_csv(f'{new_folder_path}/{ticker}_model_performance_analysis.csv')
-            full.reset_index()[['Date','Open','High','Low','Close','Adj Close','Volume','stop_loss']].to_csv(f'{new_folder_path}/{ticker}_data.csv')
-            
-            detailed_results.append(evaluation_df)
-            
-            # print(full.iloc[-1:])
+                # Create the folder if it doesn't already exist
+                if not os.path.exists(new_folder_path):
+                    os.makedirs(new_folder_path)
+                    print(f"Folder created: {new_folder_path}")
+                else:
+                    pass
+                    # print(f"Folder already exists: {new_folder_path}")
 
+                # Saving the dataframe for future reference
+                evaluation_df.to_csv(f'{new_folder_path}/{ticker}_model_performance_analysis.csv')
+                full.reset_index()[['Date','Open','High','Low','Close','Volume','stop_loss']].to_csv(f'{new_folder_path}/{ticker}_data.csv')
+                
+                detailed_results.append(evaluation_df)
+                
+                # print(full.iloc[-1:])
+        except:
+            print('No Data')
+    # print(pd.DataFrame(prediction_results))
     all_results=pd.DataFrame(prediction_results).sort_values('predicted_higher_success_rate', ascending=False)
     all_results.to_csv(f'{new_folder_path}/all_results.csv')
     # all_results.to_csv('~/Code/stock_predictions/dash/latest_results.csv')
@@ -324,6 +346,7 @@ for date in missing_dates:
     increment_non_trigger_evals(f'10_day_ahead_close/stock_performance/{date}/tickers','predictions/non_trigger_stocks.csv')
     
     # At this point we will run backtesting.py
+   
     
 # pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
 

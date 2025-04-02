@@ -15,7 +15,12 @@ def generate_lead_features (data,days_ahead):
                 cols.append(f'{n}_Day Volume Change')
             
             leads = data[cols].shift(i)
+            # print('before')
+            # print(leads)
+
             leads.columns = [f'{col}_lead_{i}' for col in leads.columns]
+            # print('after')
+            # print(leads)
             lead_features.append(leads)
-            
+            # print(lead_features)
             return lead_features

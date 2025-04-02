@@ -4,8 +4,10 @@ import os
 import pandas as pd
 # from utils.g_sheet import get_credentials, add_sheet_data,delete_sheet_data
 import gspread
+import dagster as dg
 
 # when I build other models, I can reuse this function to build the aggregated predictions for that model
+@dg.asset
 def build_predictions(target):
     
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
@@ -47,6 +49,7 @@ def build_predictions(target):
     return final_table 
 
 # each time predictions the script is ran, need to add the results to the summary.csv file
+@dg.asset
 def increment_predictions(target,table):
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
     
@@ -130,6 +133,7 @@ def increment_predictions(target,table):
                         print(f"All results not in file path")
    
 # run this everytime the predictions script is ran to add on to non_trigger_stocks for new predictions
+@dg.asset
 def increment_non_trigger_evals (target,table):
     print('Running increment_non_trigger_evals function')
     folder = os.path.expanduser(f'~/Code/stock_predictions/{target}')
@@ -232,6 +236,7 @@ def increment_non_trigger_evals (target,table):
     return 'increment_non_trigger_evals'
 
 # run this in backtesting to increment to existing backtest results table
+@dg.asset
 def increment_results(old_results_path,new_results):
     
     print('------------------------------------------')

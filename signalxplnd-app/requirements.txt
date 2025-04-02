@@ -1,0 +1,6 @@
+dash==2.15.0
+dash_bootstrap_components
+pandas
+boto3
+plotly
+apig_wsgi

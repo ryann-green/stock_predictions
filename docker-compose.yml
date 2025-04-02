@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  dash-local:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - "8050:8050"
+    volumes:
+      - ~/.aws:/root/.aws:ro  # Optional if you use boto3 locally
+    environment:
+      - LOCAL_DEV=true
+
+  dash-lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile.lambda
+    ports:
+      - "9000:8080"
+    volumes:
+      - ~/.aws:/root/.aws:ro  # For testing boto3 behavior

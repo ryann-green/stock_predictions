@@ -1,0 +1,210 @@
+{
+  "plotly": {
+    "version": "(6.0.1)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:23:26.225757",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:plotly-layer:4"
+    }
+  },
+  "packaging": {
+    "version": "(24.2)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:23:34.153455",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:packaging-layer:2"
+    }
+  },
+  "tenacity": {
+    "version": "(9.0.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:23:43.644411",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:tenacity-layer:2"
+    }
+  },
+  "dash": {
+    "version": "(3.0.1)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:24:48.098061",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:dash-layer:4"
+    }
+  },
+  "dash-core-components": {
+    "version": "(2.0.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:24:54.305195",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:dash-core-components-layer:2"
+    }
+  },
+  "dash-html-components": {
+    "version": "(2.0.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:03.104433",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:dash-html-components-layer:2"
+    }
+  },
+  "dash-table": {
+    "version": "(5.0.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:13.276389",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:dash-table-layer:2"
+    }
+  },
+  "flask": {
+    "version": "(3.1.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:24.068203",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:flask-layer:2"
+    }
+  },
+  "importlib-metadata": {
+    "version": "(8.6.1)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:35.376016",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:importlib-metadata-layer:2"
+    }
+  },
+  "nest-asyncio": {
+    "version": "(1.6.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:42.984840",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:nest-asyncio-layer:2"
+    }
+  },
+  "requests": {
+    "version": "(2.32.3)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:25:53.487346",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:requests-layer:2"
+    }
+  },
+  "retrying": {
+    "version": "(1.3.4)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:26:03.779155",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:retrying-layer:2"
+    }
+  },
+  "setuptools": {
+    "version": "(78.1.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:26:28.339758",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:setuptools-layer:2"
+    }
+  },
+  "typing-extensions": {
+    "version": "(4.13.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:26:37.859389",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:typing-extensions-layer:2"
+    }
+  },
+  "werkzeug": {
+    "version": "(3.1.3)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:26:48.460509",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:werkzeug-layer:2"
+    }
+  },
+  "dash-bootstrap-components": {
+    "version": "(2.0.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:28:00.443073",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:dash-bootstrap-components-layer:4"
+    }
+  },
+  "boto3": {
+    "version": "(1.37.24)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:28:25.766637",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:boto3-layer:4"
+    }
+  },
+  "botocore": {
+    "version": "(1.37.24)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:28:55.605733",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:botocore-layer:2"
+    }
+  },
+  "jmespath": {
+    "version": "(1.0.1)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:29:08.513708",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:jmespath-layer:2"
+    }
+  },
+  "s3transfer": {
+    "version": "(0.11.4)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:29:19.581160",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:s3transfer-layer:2"
+    }
+  },
+  "apig-wsgi": {
+    "version": "(2.19.0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T16:29:39.136929",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:apig-wsgi-layer:4"
+    }
+  },
+  "pandas": {
+    "version": "(2.2.3)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T17:23:39.665972",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:pandas-layer:1"
+    }
+  },
+  "numpy": {
+    "version": "(2.2.4)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T17:24:25.127593",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:numpy-layer:1"
+    }
+  },
+  "python-dateutil": {
+    "version": "(2.9.0.post0)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T17:24:34.000886",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:python-dateutil-layer:1"
+    }
+  },
+  "pytz": {
+    "version": "(2025.2)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T17:24:51.584528",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:pytz-layer:1"
+    }
+  },
+  "tzdata": {
+    "version": "(2025.2)",
+    "runtime": "python3.13",
+    "last_updated": "2025-03-31T17:25:11.247950",
+    "layer_arns": {
+      "us-east-2": "arn:aws:lambda:us-east-2:328695219085:layer:tzdata-layer:1"
+    }
+  }
+}

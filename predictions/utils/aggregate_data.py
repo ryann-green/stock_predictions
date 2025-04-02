@@ -1,3 +1,6 @@
+import dagster as dg
+
+@dg.asset
 def rank_data():
 
     import pandas as pd
@@ -76,7 +79,7 @@ def rank_data():
 
     agg_data_df=fourteen_day_median_profit_pct.sort_values('14_day_median_profit_rank',ascending=False)
 
-
+    print(aggregated_data)
 
     fourteen_30_spread=aggregated_data.pivot(index='ticker', columns='timeframe', values='median_profit_pct')[['14','30']].dropna()
     fourteen_30_spread['14-30_profit_spread']=fourteen_30_spread['14']-fourteen_30_spread['30']
@@ -141,5 +144,6 @@ def rank_data():
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
 
     final_ranking.to_csv('rankings/latest_recs.csv')
-    
-rank_data()
+## This allows Dagster to manage the assets' execution and dependencies
+# defs = dg.Definitions(assets=[rank_data])
+# rank_data()
