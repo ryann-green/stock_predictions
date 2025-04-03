@@ -1,7 +1,7 @@
 name: CI/CD - Lambda Image Build & Deploy
 
 on: 
-  push:
+  push: 
     branches:
       - dev
       - staging
