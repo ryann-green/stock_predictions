@@ -1,6 +1,6 @@
 name: CI/CD - Lambda Image Build & Deploy
 
-on:
+on: 
   push:
     branches:
       - dev
@@ -37,6 +37,8 @@ jobs:
           else
             echo "Unknown branch: $BRANCH"
             exit 1
+          fi
+            
           
 
       - name: Configure AWS Credentials
