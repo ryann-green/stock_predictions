@@ -55,16 +55,16 @@ def lambda_handler(event, context):
 
 
         # Define the path to the new folder within the home directory
-        home_directory = os.path.expanduser('~/Code/stock_predictions/10_day_ahead_close/stock_performance')
-        new_folder_path = os.path.join(home_directory, str(current_date))
+        # home_directory = os.path.expanduser('~/Code/stock_predictions/10_day_ahead_close/stock_performance')
+        # new_folder_path = os.path.join(home_directory, str(current_date))
         s3_folder='10_day_ahead_close/stock_performance'
 
         # Create the folder if it doesn't already exist
-        if not os.path.exists(new_folder_path):
-            os.makedirs(new_folder_path)
-            print(f"Folder created: {new_folder_path}")
-        else:
-            print(f"Folder already exists: {new_folder_path}")
+        # if not os.path.exists(new_folder_path):
+        #     os.makedirs(new_folder_path)
+        #     print(f"Folder created: {new_folder_path}")
+        # else:
+        #     print(f"Folder already exists: {new_folder_path}")
 
 
         # Fetching historical data for GOOG
