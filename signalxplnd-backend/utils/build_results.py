@@ -3,7 +3,7 @@
 import os
 import pandas as pd
 # from utils.g_sheet import get_credentials, add_sheet_data,delete_sheet_data
-import dagster as dg
+# import dagster as dg
 from utils.data_transfer import write_to_s3
 from datetime import datetime
 
