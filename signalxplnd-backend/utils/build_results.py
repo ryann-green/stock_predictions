@@ -69,7 +69,7 @@ def increment_predictions(target,table):
                                 ,'adj_prediction_higher'
                                 ,'stop_loss'
                                 ,'adj_prediction_price_w_high_inc']]
-    current_max_date=datetime.strptime(max(incremented_summary['last_date_for_prediction']), "%Y-%m-%d").date()
+    current_max_date=datetime.strptime(max(incremented_summary['last_date_for_prediction']).strip()[:10], "%Y-%m-%d").date()
     print("Current Max Date")
     print(current_max_date)
    
@@ -146,7 +146,7 @@ def increment_non_trigger_evals (target,table):
                                               ,'adj_price_higher'
                                               ,'stop_loss'
                                               ,'latest_close']]
-    current_max_date=datetime.strptime(max(incremented_summary['last_date']), "%Y-%m-%d").date()
+    current_max_date=datetime.strptime(max(incremented_summary['last_date']).strip()[:10], "%Y-%m-%d").date()
 
     # # Loop through all the subdirectories in the parent folder
     # for root, dirs, files in os.walk(folder):
@@ -266,5 +266,5 @@ def increment_results(old_results_path,new_results):
 
 
 # using for testing functions
-if __name__ == "__main__":
-    print('Hi')
+# if __name__ == "__main__":
+#     print('Hi')
