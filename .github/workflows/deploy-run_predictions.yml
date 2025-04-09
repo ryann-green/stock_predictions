@@ -1,4 +1,4 @@
-name: CI/CD - Lambda Image Build & Deploy
+name: CI/CD - Run_Predictions Image Build & Deploy
 
 on: 
   push: 

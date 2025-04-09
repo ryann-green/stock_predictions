@@ -1,4 +1,4 @@
-name: CI/CD - Lambda Image Build & Deploy
+name: CI/CD - SignalXplnd App Image Build & Deploy
 
 on: 
   push: 
