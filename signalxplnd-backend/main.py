@@ -344,4 +344,3 @@ def lambda_handler(event, context):
     
         
     # pd.concat(total_results).to_csv(f'{new_folder_path}/total_results.csv')
-
