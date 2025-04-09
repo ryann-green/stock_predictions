@@ -1,7 +1,5 @@
 import boto3
 from io import StringIO
-import subprocess
-import sys 
 import pandas as pd
 
 def read_from_s3(key):

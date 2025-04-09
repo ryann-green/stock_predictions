@@ -1,7 +1,5 @@
-import dagster as dg
-from data_transfer import read_from_s3,write_to_s3
+from utils.data_transfer import read_from_s3,write_to_s3
 
-@dg.asset
 def rank_data():
 
     import pandas as pd
@@ -60,7 +58,8 @@ def rank_data():
 
     success_ratio['success_ratio_rank']=success_ratio['success_ratio'].rank(ascending=True, method='min').astype(int)
 
-    success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
+    # success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
+    write_to_s3(success_ratio.sort_values('success_ratio',ascending=False),'target_success_ratio.csv')
 
     # Merge success ratio into the exploded data
     exploded_data = exploded_data.merge(success_ratio, on='ticker')
@@ -93,10 +92,13 @@ def rank_data():
     pivot_data = aggregated_data.pivot(index='timeframe', columns='ticker', values='median_profit_pct')
     # Save the processed data for visualization
     # pivot_data.to_csv('rankings/median_profit_pct.csv')
-    aggregated_data.to_csv('rankings/median_profit_pct.csv')
+    # aggregated_data.to_csv('rankings/median_profit_pct.csv')
+    write_to_s3(aggregated_data,'median_profit_pct.csv')
 
-    print(pivot_data.to_csv('rankings/median_profit_bell_pivot.csv'))
-    print("Data formatted and saved for visualization. File: formatted_data_with_success_ratio.csv")
+    # print(pivot_data.to_csv('rankings/median_profit_bell_pivot.csv'))
+    write_to_s3(pivot_data,'median_profit_bell_pivot.csv')
+
+    # print("Data formatted and saved for visualization. File: formatted_data_with_success_ratio.csv")
 
     # Prepare for non-trigger rate calc
     backtest_ticker_count=filtered_data.groupby('ticker')['pred_date'].count()
@@ -104,8 +106,12 @@ def rank_data():
 
 
 
-    file_path = 'predictions/non_trigger_stocks.csv'
-    non_triggers = pd.read_csv(file_path)
+    # file_path = 'predictions/non_trigger_stocks.csv'
+    # non_triggers = pd.read_csv(file_path)
+    try:
+        non_triggers=read_from_s3('non_trigger_stocks.csv')
+    except:
+        print('error reading non_triggers from s3')
     # Filter to only include rows where predicted_price_higher is True
     filtered_non_trigger_data = non_triggers[non_triggers['adj_price_higher'] == True].copy()
 
@@ -142,6 +148,5 @@ def rank_data():
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
 
     write_to_s3(final_ranking,'latest_recs.csv')
-## This allows Dagster to manage the assets' execution and dependencies
-# defs = dg.Definitions(assets=[rank_data])
-# rank_data()
+
+rank_data()

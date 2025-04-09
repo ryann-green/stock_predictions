@@ -1,0 +1,17 @@
+# Start from the Lambda base image for Python
+FROM public.ecr.aws/lambda/python:3.10
+
+# Set working directory
+WORKDIR /var/task
+
+# Copy script and utils directory
+COPY signalxplnd-backend/main.py .
+COPY signalxplnd-backend/utils/ ./utils/
+COPY signalxplnd-backend/requirements.txt .
+
+# Install dependencies if any
+RUN pip install --upgrade pip && \
+    pip install --target . -r requirements.txt --no-cache-dir && \
+    pip list
+# Set the Lambda function handler (filename.function_name)
+CMD ["main.lambda_handler"]  

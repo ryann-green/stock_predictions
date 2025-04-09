@@ -3,10 +3,12 @@ from datetime import datetime, timedelta,date
 import pandas as pd
 import warnings
 import time
-from build_results import increment_results
-from data_transfer import read_from_s3
+from utils.build_results import increment_results
+from utils.data_transfer import read_from_s3,write_to_s3
 
-from aggregate_data import rank_data
+# from aggregate_data import rank_data
+
+print(f"Backtesting Starting at {datetime.now()}")
 
 warnings.filterwarnings("ignore")
 
@@ -16,7 +18,8 @@ current_date = date.today()
 
 # Input data for multiple stocks
 # stocks_data = pd.read_csv('total_results.csv')  
-stocks_data = pd.read_csv('predictions/non_trigger_stocks.csv')
+#  stocks_data = pd.read_csv('predictions/non_trigger_stocks.csv')
+stocks_data=read_from_s3('non_trigger_stocks.csv')
 
  # Fetch data for all tickers in one batch within the range of the dataset
 def fetch_historical_data(stocks_data):
@@ -199,9 +202,13 @@ if __name__ == "__main__":
     # the below should get me a csv file of the trickers and dates that I'd need to check on the next run
     # will need to add a clause that ignores ticker from X period in the past
     non_triggers_df=pd.DataFrame(non_triggers)
-    non_triggers_df.to_csv('predictions/non_trigger_stocks.csv') 
+    # non_triggers_df.to_csv('predictions/non_trigger_stocks.csv') 
+    try:
+        write_to_s3(non_triggers_df,'non_trigger_stocks.csv')
+    except:
+        print('error writing non_trigger_stocks.csv to s3 in backtesting.py')
     
-    # perform the ranking after  backtesting is finished
-    rank_data()
+    print(f"Backtesting Ending at {datetime.now()}")
+
     
     

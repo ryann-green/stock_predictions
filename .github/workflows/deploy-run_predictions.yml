@@ -1,0 +1,67 @@
+name: CI/CD - Lambda Image Build & Deploy
+
+on: 
+  push: 
+    branches:
+      - dev
+      - staging
+      - prod
+
+jobs:
+  build-and-deploy: 
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REPOSITORY: signalxplnd-run_predictions
+      ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Environment Based on Branch
+        id: env
+        run: |
+          BRANCH=${{ github.ref_name }}
+
+          if [[ "$BRANCH" == "dev" ]]; then
+            echo "LAMBDA_FUNCTION=SignalXplnd-run_predictions" >> $GITHUB_ENV
+            echo "IMAGE_TAG=dev" >> $GITHUB_ENV
+          elif [[ "$BRANCH" == "staging" ]]; then
+            echo "LAMBDA_FUNCTION=my-lambda-staging" >> $GITHUB_ENV
+            echo "IMAGE_TAG=staging" >> $GITHUB_ENV
+          elif [[ "$BRANCH" == "prod" ]]; then
+            echo "LAMBDA_FUNCTION=my-lambda-prod" >> $GITHUB_ENV
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+          else
+            echo "Unknown branch: $BRANCH"
+            exit 1
+          fi
+            
+          
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -f Dockerfile.lambda -t $ECR_REPOSITORY:$IMAGE_TAG .
+
+      - name: Tag and Push Image to ECR
+        run: |
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update Lambda Function
+        run: |
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
