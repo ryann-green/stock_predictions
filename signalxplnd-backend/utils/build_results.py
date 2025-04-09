@@ -196,14 +196,15 @@ def increment_non_trigger_evals (target,table):
             print(f"New data date: {new_date}")
             print(f"Length of trigger stocks table: {len(incremented_summary)}")
             print(f"Length of new data: {len(new_data)}")
-            print(f"Length of combined data after concat {len(pd.concat([incremented_summary,new_data]))}")
             
-            pd.concat([incremented_summary,new_data]).reset_index(drop=True).to_csv(table)
+            # pd.concat([incremented_summary,new_data]).reset_index(drop=True).to_csv(table)
             try:
                 write_to_s3(pd.concat([incremented_summary,new_data]).reset_index(drop=True),'non_trigger_stocks.csv')            
                     # update to google sheets
                 # add_sheet_data(get_credentials(),'non_trigger_stocks',new_data)
                 print(f'non_trigger_stocks updated in s3  with data from {new_date}')
+                print(f"Length of combined data after concat {len(pd.concat([incremented_summary,new_data]))}")
+
             except:
                 print('error writing non_trigger_evals to s3')
             
