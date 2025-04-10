@@ -26,7 +26,10 @@ def lambda_handler(event, context):
 
     # Fetch data for all tickers in one batch within the range of the dataset
     def fetch_historical_data(stocks_data):
+        print('beginning fetch_historical_data function')
         tickers = stocks_data['ticker'].unique()
+        
+        print('retrieved unique tickers from stocks_data')
         
         
         start_date = (datetime.strptime(stocks_data['last_date'].min(), "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
@@ -146,14 +149,14 @@ def lambda_handler(event, context):
                 
                 result = check_first_trigger(historical_data=ticker_data,
                     ticker=ticker,
-                    buy_price=stock[2],
-                    overall_success_rate=stock[3],
-                    predicted_higher_success_rate=stock[4],
+                    buy_price=stock['buy_price'],
+                    overall_success_rate=stock['overall_success_rate'],
+                    predicted_higher_success_rate=stock['predicted_higher_success_rate'],
                     last_date=ticker_date,
-                    adj_prediction_price=stock[6], 
-                    adj_price_higher=stock[7],
-                    stop_loss=stock[8],
-                    latest_close=stock[9]
+                    adj_prediction_price=stock['adj_prediction_price'], 
+                    adj_price_higher=stock['adj_price_higher'],
+                    stop_loss=stock['stop_loss'],
+                    latest_close=stock['latest_close']
                 )
                 
                 if result :
@@ -165,14 +168,14 @@ def lambda_handler(event, context):
                     non_tagged_results={}
                     
                     non_tagged_results["ticker"]= ticker
-                    non_tagged_results["buy_price"]=stock[2]
-                    non_tagged_results["overall_success_rate"]=stock[3]
-                    non_tagged_results["predicted_higher_success_rate"]=stock[4]
+                    non_tagged_results["buy_price"]=stock['buy_price']
+                    non_tagged_results["overall_success_rate"]=stock['overall_success_rate']
+                    non_tagged_results["predicted_higher_success_rate"]=stock['predicted_higher_success_rate']
                     non_tagged_results["last_date"]=ticker_date
-                    non_tagged_results["adj_prediction_price"]=stock[6]
-                    non_tagged_results["adj_price_higher"]=stock[7]
-                    non_tagged_results["stop_loss"]=stock[8]
-                    non_tagged_results["latest_close"]=stock[9]
+                    non_tagged_results["adj_prediction_price"]=stock['adj_prediction_price']
+                    non_tagged_results["adj_price_higher"]=stock['adj_price_higher']
+                    non_tagged_results["stop_loss"]=stock['stop_loss']
+                    non_tagged_results["latest_close"]=stock['latest_close']
             
                     non_triggers.append(non_tagged_results)
                     
@@ -182,8 +185,17 @@ def lambda_handler(event, context):
 
     # Main execution
     # if __name__ == "__main__":
-    historical_data = fetch_historical_data(stocks_data)
-    processed_results,non_triggers = process_stocks(stocks_data, historical_data)
+    try:
+        historical_data = fetch_historical_data(stocks_data)
+        print('Historical Data returned')
+    except Exception as e:
+        print(e)
+        
+    try:
+        processed_results,non_triggers = process_stocks(stocks_data, historical_data)
+        print('Processed results and non_triggers returned')
+    except Exception as e:
+        print(e)
     # print(processed_results)
     results_df = pd.DataFrame(processed_results)
     increment_results(read_from_s3('backtest_results.csv'),processed_results)

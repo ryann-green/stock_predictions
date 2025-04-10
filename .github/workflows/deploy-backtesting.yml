@@ -1,4 +1,4 @@
-name: CI/CD - Run_Predictions Image Build & Deploy
+name: CI/CD - Backtesting Image Build & Deploy
 
 on: 
   push: 
