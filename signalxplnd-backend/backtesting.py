@@ -32,7 +32,7 @@ def lambda_handler(event, context):
         print('retrieved unique tickers from stocks_data')
         
         
-        start_date = (datetime.strptime(stocks_data['last_date'].min(), "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+        start_date = (datetime.strptime(min(stocks_data['last_date']).strip()[:10], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
         print(start_date)
 
         end_date = (datetime.strptime(max(stocks_data['last_date']).strip()[:10], "%Y-%m-%d")).strftime("%Y-%m-%d")
@@ -56,7 +56,7 @@ def lambda_handler(event, context):
         # Calculate stop_loss threshold
         stop_loss_price = latest_close + (latest_close * stop_loss)
         
-        pd.to_datetime(historical_data.reset_index()['Date'],format='%Y-%m-%d').dt.date
+        pd.to_datetime(historical_data.reset_index()['Date'],format='%Y-%m-%d').strip()[:10].dt.date
         
         h_data=historical_data.reset_index()
         # print(h_data.columns.droplevel(1))
