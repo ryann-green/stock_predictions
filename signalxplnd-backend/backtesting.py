@@ -134,7 +134,7 @@ def lambda_handler(event, context):
         # completed_dates=[]
         for _, stock in stocks_data.iterrows():
             
-            ticker=stock[1]
+            ticker=stock['ticker']
             # print(ticker)
             
             # if ticker in 'MA':
@@ -145,7 +145,7 @@ def lambda_handler(event, context):
 
             if ticker_data is not None:
                 
-                ticker_date=stock[5]
+                ticker_date=stock['last_date']
                 
                 result = check_first_trigger(historical_data=ticker_data,
                     ticker=ticker,
