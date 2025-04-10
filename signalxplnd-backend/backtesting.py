@@ -56,15 +56,15 @@ def lambda_handler(event, context):
         # Calculate stop_loss threshold
         stop_loss_price = latest_close + (latest_close * stop_loss)
         
-        pd.to_datetime(historical_data.reset_index()['Date'],format='%Y-%m-%d').strip()[:10].dt.date
+        pd.to_datetime(historical_data.reset_index()['Date'],format='%Y-%m-%d').dt.date
         
         h_data=historical_data.reset_index()
         # print(h_data.columns.droplevel(1))
         
     
-        adj_price_dates = h_data[((h_data['High'] > adj_prediction_price) & (datetime.strptime(last_date,'%Y-%m-%d').date() < h_data['Date'].dt.date)) ]
+        adj_price_dates = h_data[((h_data['High'] > adj_prediction_price) & (datetime.strptime(last_date.strip()[:10],'%Y-%m-%d').date() < h_data['Date'].dt.date)) ]
         # print(adj_price_dates)
-        stop_loss_dates = h_data[((h_data['Low'] < stop_loss_price) & (datetime.strptime(last_date,'%Y-%m-%d').date()< h_data['Date'].dt.date))]
+        stop_loss_dates = h_data[((h_data['Low'] < stop_loss_price) & (datetime.strptime(last_date.strip()[:10],'%Y-%m-%d').date()< h_data['Date'].dt.date))]
         # print(stop_loss_dates)
 
         # Determine first occurrence
