@@ -15,7 +15,14 @@ def rank_data(event,context):
     filtered_data = data[data['predicted_price_higher'] == True].copy()
 
     # Convert dates to datetime objects for calculation
-    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date']).dt.normalize()
+    # Step 1: Optional, but helpful - clean the strings
+    filtered_data['pred_date'] = filtered_data['pred_date'].astype(str).str.strip()
+
+    # Step 2: Convert to datetime (this must succeed for .dt to work)
+    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date'], errors='coerce')
+
+    # Step 3: Now safe to use .dt.normalize()
+    filtered_data['pred_date'] = filtered_data['pred_date'].dt.normalize()
 
     # Define the current date (anchor date)
     current_date = datetime.now()

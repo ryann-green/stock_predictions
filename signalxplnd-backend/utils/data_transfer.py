@@ -25,6 +25,6 @@ def write_to_s3(df, key):
     s3.put_object(Bucket=bucket_name, Key=key, Body=csv_buffer.getvalue())
     
     
-    print(f'{key} writtern to {bucket_name}')
+    print(f'{key} written to {bucket_name}')
     
 
