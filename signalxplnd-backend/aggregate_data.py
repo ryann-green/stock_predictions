@@ -1,6 +1,6 @@
 from utils.data_transfer import read_from_s3,write_to_s3
 
-def rank_data():
+def rank_data(event,context):
 
     import pandas as pd
     from datetime import datetime
@@ -15,7 +15,7 @@ def rank_data():
     filtered_data = data[data['predicted_price_higher'] == True].copy()
 
     # Convert dates to datetime objects for calculation
-    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date'])
+    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date']).dt.normalize()
 
     # Define the current date (anchor date)
     current_date = datetime.now()
@@ -149,4 +149,3 @@ def rank_data():
 
     write_to_s3(final_ranking,'latest_recs.csv')
 
-rank_data()

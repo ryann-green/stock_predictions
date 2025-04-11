@@ -1,0 +1,17 @@
+# Start from the Lambda base image for Python
+FROM public.ecr.aws/lambda/python:3.12
+
+# Set working directory
+WORKDIR /var/task
+
+# Copy script and utils directory
+COPY signalxplnd-backend/aggregate_data.py .
+COPY signalxplnd-backend/utils/ ./utils/
+COPY signalxplnd-backend/requirements.txt .
+
+# Install dependencies if any
+RUN pip install --upgrade pip && \
+    pip install --target /var/task -r requirements.txt --no-cache-dir 
+    
+# Set the Lambda function handler (filename.function_name)
+CMD ["aggregate_data.rank_data"]  
