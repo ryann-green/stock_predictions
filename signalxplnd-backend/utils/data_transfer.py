@@ -1,6 +1,7 @@
 import boto3
 from io import StringIO
 import pandas as pd
+import re
 
 def read_from_s3(key):
     s3 = boto3.client('s3')
@@ -16,6 +17,16 @@ def read_from_s3(key):
     return df
 
 def write_to_s3(df, key):
+    
+    # Validate that all 'ticker' values are strings with at least one letter
+    if 'ticker' in df.columns:
+        is_valid_ticker = df['ticker'].apply(
+            lambda x: isinstance(x, str) and bool(re.search(r'[A-Za-z]', x))
+        )
+
+        if not is_valid_ticker.all():
+            raise ValueError("All values in the 'ticker' column must be strings containing at least one letter.")
+
     s3 = boto3.client('s3')
     bucket_name = 'signalxplnd'
 
