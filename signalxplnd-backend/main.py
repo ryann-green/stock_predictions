@@ -123,6 +123,20 @@ def lambda_handler(event, context):
                 ,'DDOG'
                 ,'PLTR'
                 ,'AMD'
+                ,'AZ'
+                ,'ADPT'
+                ,'AEVA'
+                ,'ASPI'
+                ,'AVAH'
+                ,'ASM'
+                ,'CMRX'
+                ,'CURI'
+                ,'QBTS'
+                ,'XGN'
+                ,'MBOT'
+                ,'NAK'
+                ,'TOI'
+                ,'WOOF'
                 ]
         end_date = current_date
         # end_date = datetime(year, month, day)
