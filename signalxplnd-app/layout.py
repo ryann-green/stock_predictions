@@ -5,11 +5,13 @@ from datetime import datetime,date
 # import dash_html_components as html
 from dash import html
 from dash.dependencies import Input, Output
+from pytz import timezone
 
 
 # Load data
 br_df,p_df,recs_df = load_data()
-current_date = datetime.now().date()
+tz = timezone('EST')
+current_date = datetime.now(tz).date()
 
 navbar = dbc.Navbar(
     dbc.Container(

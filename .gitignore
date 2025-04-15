@@ -167,3 +167,4 @@ gsheet.py
 service_account.json
 *.csv
 dont_need/
+*.json

@@ -10,25 +10,32 @@ def rank_data(event,context):
 
     # Load the backtesting dataset
     data = read_from_s3('backtest_results.csv')
+    
 
     # Filter to only include rows where predicted_price_higher is True
     filtered_data = data[data['predicted_price_higher'] == True].copy()
 
     # Convert dates to datetime objects for calculation
     # Step 1: Optional, but helpful - clean the strings
-    filtered_data['pred_date'] = filtered_data['pred_date'].astype(str).str.strip()
+    # filtered_data['pred_date'] = filtered_data['pred_date'].astype(str).str.strip()
+    filtered_data['pred_date'] = filtered_data['pred_date'].apply(
+    lambda x: datetime.strptime(x.strip()[:10], "%Y-%m-%d")
+)
+
 
     # Step 2: Convert to datetime (this must succeed for .dt to work)
-    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date'], errors='coerce')
+    filtered_data['pred_date'] = pd.to_datetime(filtered_data['pred_date'])
+
 
     # Step 3: Now safe to use .dt.normalize()
-    filtered_data['pred_date'] = filtered_data['pred_date'].dt.normalize()
+    # filtered_data['pred_date'] = filtered_data['pred_date'].
 
     # Define the current date (anchor date)
     current_date = datetime.now()
 
     # Calculate time difference between current_date and pred_date
     filtered_data['days_since_prediction'] = (current_date - filtered_data['pred_date']).dt.days
+    
 
     # Define timeframes (in days)
     timeframes = {
@@ -54,18 +61,34 @@ def rank_data(event,context):
     # Explode the rows so that each timeframe gets its own row
     exploded_data = filtered_data.explode('applicable_timeframes')
     exploded_data = exploded_data.rename(columns={'applicable_timeframes': 'timeframe'})
+    
+    tickers=[]
+    # [tickers.append(ticker) for ticker in data['ticker'] if ticker not in tickers]
+    
+    # [print(ticker) for ticker in tickers]
+    
+    
 
     # Calculate the target price success ratio for each ticker
+    #  This is how many times the target price was triggered of all the prediction backtests
     success_ratio = (
         data.groupby('ticker')
-        .apply(lambda x: (x['first_trigger'] == 'target_price').sum() / len(x))
+        .apply(lambda x: pd.Series({
+            'trigger_count': (x['first_trigger'] == 'target_price').sum(),
+            'total_count': len(x),
+            'success_ratio': (x['first_trigger'] == 'target_price').sum() / len(x)
+        }))
         .reset_index()
         .rename(columns={0: 'success_ratio'})
     )
+    
+    print(success_ratio)
 
     success_ratio['success_ratio_rank']=success_ratio['success_ratio'].rank(ascending=True, method='min').astype(int)
 
     # success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
+    print(success_ratio.sort_values('success_ratio',ascending=False))
+
     write_to_s3(success_ratio.sort_values('success_ratio',ascending=False),'target_success_ratio.csv')
 
     # Merge success ratio into the exploded data
@@ -155,4 +178,5 @@ def rank_data(event,context):
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
 
     write_to_s3(final_ranking,'latest_recs.csv')
+    
 
