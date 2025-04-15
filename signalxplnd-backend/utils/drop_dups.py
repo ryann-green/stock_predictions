@@ -1,10 +1,29 @@
 import pandas as pd
+from data_transfer import read_from_s3, write_to_s3
 
-# Remove duplicates based on `ticker` and `pred_date`, keeping the first occurrence
-df_cleaned = pd.read_csv('summary_results.csv').drop_duplicates(subset=["ticker", "pred_date"], keep="first")
+def clean_files(file):
 
-# Display the cleaned DataFrame
-print(df_cleaned)
+    results=read_from_s3(file)
+    print(results)
+
+    duplicates = results[results.duplicated(subset=["ticker", "pred_date"], keep=False)].sort_values(by=["ticker", "pred_date"])
+
+    # Display duplicates
+    print(f"\nDuplicate Rows based on ['ticker', 'pred_date'] in {file}:")
+    print(duplicates)
+    
+    if duplicates.empty == False:
+
+        # Remove duplicates based on `ticker` and `pred_date`, keeping the first occurrence
+        df_cleaned = results.drop_duplicates(subset=["ticker", "pred_date"], keep="first")
+
+        # Confirm there are no more duplicates
+        print(df_cleaned[df_cleaned.duplicated(subset=["ticker", "pred_date"], keep=False)])
+        
+        write_to_s3(df_cleaned,file)
+        
+    else:
+        print('there are no duplicates')
 
 # Optionally save the cleaned data to a CSV
-df_cleaned.to_csv("summary_results_cleaned.csv", index=False)
+clean_files('backtest_results.csv')

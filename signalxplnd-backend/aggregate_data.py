@@ -178,5 +178,3 @@ def rank_data(event,context):
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
 
     write_to_s3(final_ranking,'latest_recs.csv')
-    
-
