@@ -72,21 +72,24 @@ def rank_data(event,context):
     # Calculate the target price success ratio for each ticker
     #  This is how many times the target price was triggered of all the prediction backtests
     success_ratio = (
-        data.groupby('ticker')
+    data.groupby('ticker')
         .apply(lambda x: pd.Series({
-            'trigger_count': (x['first_trigger'] == 'target_price').sum(),
-            'total_count': len(x),
-            'success_ratio': (x['first_trigger'] == 'target_price').sum() / len(x)
+            'trigger_count': ((x['predicted_price_higher'] == True) & (x['first_trigger'] == 'target_price')).sum(),
+            'total_count': (x['predicted_price_higher'] == True).sum(),
+            'success_ratio': (
+                ((x['predicted_price_higher'] == True) & (x['first_trigger'] == 'target_price')).sum()
+                / (x['predicted_price_higher'] == True).sum()
+                if (x['predicted_price_higher'] == True).sum() > 0 else 0
+            )
         }))
         .reset_index()
-        .rename(columns={0: 'success_ratio'})
-    )
+)
     
     print(success_ratio)
 
     success_ratio['success_ratio_rank']=success_ratio['success_ratio'].rank(ascending=True, method='min').astype(int)
 
-    # success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
+    # # success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
     print(success_ratio.sort_values('success_ratio',ascending=False))
 
     write_to_s3(success_ratio.sort_values('success_ratio',ascending=False),'target_success_ratio.csv')
