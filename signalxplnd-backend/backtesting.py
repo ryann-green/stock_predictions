@@ -5,6 +5,7 @@ import warnings
 import time
 from utils.build_results import increment_results
 from utils.data_transfer import read_from_s3,write_to_s3
+from utils.drop_dups import clean_file
 
 # from aggregate_data import rank_data
 
@@ -202,6 +203,13 @@ def lambda_handler(event, context):
     # print(results_df)
     # results_df.to_csv('summary_results.csv', index=False)
     
+    # cleans the backtest_results csv file and removes duplicates based on the prediction date column
+    try:
+        clean_file('backtest_results.csv','pred_date')
+    except:
+        print('Error cleaning the backtest_results file from backtesting.py')
+    
+    
     
     # the below should get me a csv file of the trickers and dates that I'd need to check on the next run
     # will need to add a clause that ignores ticker from X period in the past
@@ -214,5 +222,6 @@ def lambda_handler(event, context):
     
     print(f"Backtesting Ending at {datetime.now()}")
 
+lambda_handler(1,2)
         
         
