@@ -1,5 +1,5 @@
 import pandas as pd
-from data_transfer import read_from_s3, write_to_s3
+from utils.data_transfer import read_from_s3, write_to_s3
 
 def clean_file(file,date_col):
 
