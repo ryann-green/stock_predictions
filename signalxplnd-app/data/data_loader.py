@@ -25,8 +25,9 @@ def load_data():
 
         p_df = read_from_s3('predictions_table.csv')
         recs_df = read_from_s3('latest_recs.csv')
+        success_ratio=read_from_s3('target_success_ratio.csv')
 
         # Additional preprocessing steps can go here
-        return br_df,p_df, recs_df
+        return br_df,p_df, recs_df,success_ratio
     except FileNotFoundError:
         raise FileNotFoundError("CSV file not found. Ensure 'predictions/backtest_results.csv' exists.")

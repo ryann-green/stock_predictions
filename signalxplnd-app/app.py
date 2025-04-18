@@ -1,6 +1,6 @@
 import dash 
 import dash_bootstrap_components as dbc
-from layout import create_layout
+from layout.layout import create_layout
 from callbacks import register_callbacks
 
 # Create Dash app ONCE at the module level
