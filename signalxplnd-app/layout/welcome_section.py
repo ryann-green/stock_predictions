@@ -11,7 +11,7 @@ def create_welcome_section():
         html.H2("Welcome to SignalXplnd – Your Data-Driven Edge in Stock Predictions", className="text-primary"),
         html.P(
             "Unlock the power of predictive analytics with SignalXplnd, a cutting-edge stock prediction platform "
-            "designed to help you make informed investment decisions. Our ranking system is meticulously crafted to "
+            "designed to help you make informed day-trading decisions. Our ranking system is meticulously crafted to "
             "identify stocks with strong profit potential based on historical performance and predictive modeling."
         ),
 

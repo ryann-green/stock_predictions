@@ -18,16 +18,23 @@ def read_from_s3(key):
     return df
 
 
-def load_data():
+def load_data(file):
     # Centralized function to load and preprocess data
     try:
-        br_df = read_from_s3('backtest_results.csv')
-
-        p_df = read_from_s3('predictions_table.csv')
-        recs_df = read_from_s3('latest_recs.csv')
-        success_ratio=read_from_s3('target_success_ratio.csv')
+        
+        df=read_from_s3(file)
+        
 
         # Additional preprocessing steps can go here
-        return br_df,p_df, recs_df,success_ratio
+        return df
     except FileNotFoundError:
         raise FileNotFoundError("CSV file not found. Ensure 'predictions/backtest_results.csv' exists.")
+
+
+# keeping all files to use in app in one place 
+br_df = read_from_s3('backtest_results.csv')
+p_df = read_from_s3('predictions_table.csv')
+recs_df = read_from_s3('latest_recs.csv')
+success_ratio=read_from_s3('target_success_ratio.csv')
+
+max_prediction_date=max(p_df['last_date_for_prediction'])

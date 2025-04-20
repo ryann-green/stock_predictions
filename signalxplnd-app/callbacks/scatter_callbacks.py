@@ -1,10 +1,9 @@
 from dash import Input, Output, dcc
 
-from data.data_loader import load_data  
+from data.data_loader import p_df  
 from dash.dependencies import Input, Output
 import plotly.express as px
 
-_, p_df, _, _ = load_data()
 
 def register_scatter_callbacks(app):
     @app.callback(

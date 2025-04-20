@@ -8,8 +8,6 @@ tz = timezone('EST')
 
 current_date = datetime.now(tz).date()
 
-
-
 def create_ranked_table():
     return dbc.Container(
         [

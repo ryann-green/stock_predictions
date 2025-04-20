@@ -17,7 +17,29 @@ def create_weighting_controls():
             ),
 
             dbc.Row(
-                [
+                [dbc.Col(
+                        [
+                            html.Label("Success Ratio Rank"),
+                            dcc.Dropdown(
+                                id="weight-success-ratio",
+                                options=[{"label": f"{i}%", "value": i} for i in range(0, 101, 5)],
+                                value=50,
+                                clearable=False
+                            ),
+                        ],
+                        width=4
+                    ),
+                 dbc.Col(
+                        [
+                            html.Label("Non-Trigger Rank"),
+                            dcc.Dropdown(
+                                id="weight-non-trigger",
+                                options=[{"label": f"{i}%", "value": i} for i in range(0, 101, 5)],
+                                value=35,
+                                clearable=False
+                            ),
+                        ],
+                        width=4),
                     dbc.Col(
                         [
                             html.Label("14-Day Median Profit Rank"),
@@ -30,19 +52,14 @@ def create_weighting_controls():
                         ],
                         width=4
                     ),
-                    dbc.Col(
-                        [
-                            html.Label("Success Ratio Rank"),
-                            dcc.Dropdown(
-                                id="weight-success-ratio",
-                                options=[{"label": f"{i}%", "value": i} for i in range(0, 101, 5)],
-                                value=50,
-                                clearable=False
-                            ),
-                        ],
-                        width=4
-                    ),
-                    dbc.Col(
+                    
+                    
+                ],
+                className="mb-3"
+            ),
+
+            dbc.Row(
+                [dbc.Col(
                         [
                             html.Label("Spread Rank"),
                             dcc.Dropdown(
@@ -54,24 +71,8 @@ def create_weighting_controls():
                         ],
                         width=4
                     ),
-                ],
-                className="mb-3"
-            ),
-
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            html.Label("Non-Trigger Rank"),
-                            dcc.Dropdown(
-                                id="weight-non-trigger",
-                                options=[{"label": f"{i}%", "value": i} for i in range(0, 101, 5)],
-                                value=35,
-                                clearable=False
-                            ),
-                        ],
-                        width=4
-                    ),
+                    
+                    
                     dbc.Col(
                         [
                             html.Label("Predictions Rank"),

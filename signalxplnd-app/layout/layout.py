@@ -7,9 +7,9 @@ from layout.scatter_plot import create_scatter_plot
 from layout.filtered_table import create_filtered_table
 from layout.line_chart import create_line_chart
 from layout.column_chart import create_column_chart
-from data.data_loader import load_data
+from data.data_loader import br_df,p_df
 
-br_df,p_df, _,_ = load_data()
+
 def create_layout():
     return dbc.Container(
         [   create_welcome_section(),
@@ -22,14 +22,16 @@ def create_layout():
             ),
             dbc.Row(
                 [
-                    dbc.Col(create_ranked_table(),width=7),
-                     dbc.Col(create_scatter_plot(p_df), width=5),
+                    dbc.Col(create_ranked_table(),width=6),
+                    dbc.Col(create_filtered_table(br_df), width=6),
+                     
                     
                 ]
             ),
             dbc.Row(
                 [
-                    dbc.Col(create_filtered_table(br_df), width=6),  # Container 3: Filtered Data Table
+                      # Container 3: Filtered Data Table
+                    dbc.Col(create_scatter_plot(p_df), width=6),
                     dbc.Col(
                     dbc.Container(
                         [

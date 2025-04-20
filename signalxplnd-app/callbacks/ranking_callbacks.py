@@ -1,9 +1,7 @@
 from dash.dash_table import DataTable
-from data.data_loader import load_data  
+from data.data_loader import recs_df  
 from dash.dependencies import Input, Output
 
-
-_,_, recs_df,_ = load_data()
 
 
 def register_ranking_callbacks(app):

@@ -1,10 +1,9 @@
 from dash import Input, Output, dcc
 from dash.dash_table import DataTable
-from data.data_loader import load_data  
+from data.data_loader import br_df
 from dash.dependencies import Input, Output
 import plotly.express as px
 
-br_df, _, _, _ = load_data()
 
 def register_table_callbacks(app):
     @app.callback(
@@ -89,7 +88,7 @@ def register_table_callbacks(app):
             sort_action="native",
             filter_action="native",
             page_action="native",
-            page_size=10,  # Show 10 rows per page
+            page_size=13,  
             style_table={
                 "overflowX": "auto",
                 "maxHeight": "500px",
