@@ -30,32 +30,32 @@ def create_cards():
                 ]
             )
         ),
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    html.H5("Estimated Trade Value", className="card-title"),
-                    html.Div(
-                        className="card-text",
-                        id="etv"                    ),
-                    # dbc.Button("Click here", color="danger", className="mt-auto"),
-                ]
-            )
-        ),
+        # dbc.Card(
+        #     dbc.CardBody(
+        #         [
+        #             html.H5("Estimated Trade Value", className="card-title"),
+        #             html.Div(
+        #                 className="card-text",
+        #                 id="etv"                    ),
+        #             # dbc.Button("Click here", color="danger", className="mt-auto"),
+        #         ]
+        #     )
+        # ),
     ]
 ),
     dbc.CardGroup(
     [
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    html.H5("Median Trigger Time", className="card-title"),
-                    html.Div(
-                        className="card-text",
-                        id="time_days"                    ),
-                    # dbc.Button("Click here", color="success", className="mt-auto"),
-                ]
-            )
-        ),
+        # dbc.Card(
+        #     dbc.CardBody(
+        #         [
+        #             html.H5("Median Trigger Time", className="card-title"),
+        #             html.Div(
+        #                 className="card-text",
+        #                 id="time_days"                    ),
+        #             # dbc.Button("Click here", color="success", className="mt-auto"),
+        #         ]
+        #     )
+        # ),
         dbc.Card(
             dbc.CardBody(
                 [

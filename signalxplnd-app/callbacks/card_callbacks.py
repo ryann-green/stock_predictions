@@ -6,8 +6,8 @@ def register_card_callbacks(app):
     @app.callback(
         Output("profit_ratio", "children"),
         Output("success_ratio", "children"),
-        Output("etv", "children"),
-        Output("time_days", "children"),
+        # Output("etv", "children"),
+        # Output("time_days", "children"),
         Output("backtest_total", "children"),
         Output("backtest_correct", "children"),
         [
@@ -42,4 +42,4 @@ def register_card_callbacks(app):
 
         
         # Return the updated table
-        return html.H2(profit_ratio),html.H2(success_ra),html.H2(expected_trade_value),html.P('time_days_output'),html.H2(all_true_higher_predictions),html.H2(succesful_triggers)
+        return html.H2(profit_ratio),html.H2(success_ra),html.H2(all_true_higher_predictions),html.H2(succesful_triggers)
