@@ -7,7 +7,7 @@ from callbacks import register_callbacks
 app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    # requests_pathname_prefix="/dev/",
+    requests_pathname_prefix="/dev/",
     title="SignalXplnd"
 )
 
