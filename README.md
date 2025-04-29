@@ -14,6 +14,11 @@ This repository contains scripts for a **Stock Prediction App** designed to pred
 ## frontend
 1. signalxplnd-app - displays ranking results from back-end
 
+
+## App Architechture
+![image](https://github.com/user-attachments/assets/3aef64eb-a0de-4ff7-a667-ea90b6ddbbbe)
+
+
 ## Features
 
 1. **Data Fetching and Preprocessing**:
