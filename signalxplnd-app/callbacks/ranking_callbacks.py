@@ -1,5 +1,5 @@
 from dash.dash_table import DataTable
-from data.data_loader import recs_df  
+from data.data_loader import recs_df,success_ratio
 from dash.dependencies import Input, Output
 
 
@@ -18,29 +18,33 @@ def register_ranking_callbacks(app):
     )
     
     def update_rankings(w_median, w_success, w_spread, w_non_trigger, w_predictions):
+        merged_df = recs_df.merge(success_ratio[['ticker', 'success_ratio']], on='ticker', how='inner')
         # Normalize weights to sum to 1
         total_weight = w_median + w_success + w_spread + w_non_trigger + w_predictions
         normalized_weights = {
             "14_day_median_profit_rank": w_median / total_weight,
-            "success_ratio_rank": w_success / total_weight,
+            "success_ratio": w_success / total_weight,
             "spread_rank": w_spread / total_weight,
             "non_trigger_rank": w_non_trigger / total_weight,
             "predictions_rank": w_predictions / total_weight,
         }
 
         # Calculate weighted rankings
-        recs_df["weighted_rank"] = round((
-            recs_df["14_day_median_profit_rank"] * normalized_weights["14_day_median_profit_rank"]
-            + recs_df["success_ratio_rank"] * normalized_weights["success_ratio_rank"]
-            + recs_df["spread_rank"] * normalized_weights["spread_rank"]
-            + recs_df["non_trigger_rank"] * normalized_weights["non_trigger_rank"]
-            + recs_df["predictions_rank"] * normalized_weights["predictions_rank"]
+        merged_df["weighted_rank"] = round((
+            merged_df["14_day_median_profit_rank"] * normalized_weights["14_day_median_profit_rank"]
+            + merged_df["success_ratio"] * normalized_weights["success_ratio"]
+            + merged_df["spread_rank"] * normalized_weights["spread_rank"]
+            + merged_df["non_trigger_rank"] * normalized_weights["non_trigger_rank"]
+            + merged_df["predictions_rank"] * normalized_weights["predictions_rank"]
         ))
-        ranked_df = recs_df.sort_values(by="weighted_rank",ascending=False).reset_index(drop=True)
+          
+        ranked_df = merged_df.sort_values(by="success_ratio",ascending=False).reset_index(drop=True)
 
         formatted_ranked_df=ranked_df[['ticker'
                             , 'last_date_for_prediction'
                             ,'weighted_rank'
+
+                            ,'success_ratio'
                             #   ,'14_day_median_profit_rank'
                             #   ,'success_ratio_rank'
                             #   ,'spread_rank'
@@ -48,11 +52,13 @@ def register_ranking_callbacks(app):
                             #   ,'predictions_rank'
                               ,'latest_close'
                               ,'stop_loss_amt'
-                              ,'adj_prediction_price_w_high_inc']]
-        formatted_ranked_df.iloc[:, -3:] = formatted_ranked_df.iloc[:, -3:].round(2)
+                              ,'adj_prediction_price_w_high_inc'
+                              ]]
+        formatted_ranked_df.iloc[:, -4:] = formatted_ranked_df.iloc[:, -4:].round(2)
         formatted_ranked_df.rename(columns={'ticker': 'Ticker'
                                             , 'last_date_for_prediction': 'Prediction Date'
                                             , 'weighted_rank': 'Rank'
+                                            ,'success_ratio': "Success Ratio"
                                             ,'latest_close': 'Close'
                                             , 'stop_loss_amt': 'Stop-Loss'
                                             , 'adj_prediction_price_w_high_inc': 'Prediction Price'}

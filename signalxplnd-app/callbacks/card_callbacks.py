@@ -19,7 +19,7 @@ def register_card_callbacks(app):
         
         current_ticker_df=recs_df.loc[recs_df['ticker']==ticker]
         
-        print(current_ticker_df)
+        # print(current_ticker_df)
         
         latest_close=current_ticker_df['latest_close']
         stop_loss_pct=current_ticker_df['stop_loss']
@@ -28,16 +28,16 @@ def register_card_callbacks(app):
         est_gain=(prediction_price-latest_close)/latest_close
         profit_ratio=round(abs(est_gain/stop_loss_pct),2)
         # print(profit_ratio)
-        print(profit_ratio.iloc[0] )
+        # print(profit_ratio.iloc[0] )
         
         current_ticker_success_df=success_ratio.loc[success_ratio['ticker']==ticker]
         succesful_triggers=current_ticker_success_df['trigger_count']
         all_true_higher_predictions=current_ticker_success_df['total_count']
         success_ra=round(current_ticker_success_df['success_ratio'],2)
-        print(success_ra.iloc[0] )
+        # print(success_ra.iloc[0] )
         
         expected_trade_value=success_ra.iloc[0] *profit_ratio.iloc[0]
-        print(expected_trade_value)
+        # print(expected_trade_value)
 
 
         

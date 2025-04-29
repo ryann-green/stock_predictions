@@ -301,11 +301,13 @@ def lambda_handler(event, context):
                     
                     adj_prediction_price=predicted_price_10_days_ahead*(1+(average_act_vs_pred_diff+median_act_vs_pred_diff)/2)
                     pred_results['adj_prediction_price']=adj_prediction_price
-                    pred_results['adj_prediction_higher']=adj_prediction_price>last_row['Close'][0]
+                    # pred_results['adj_prediction_higher']=adj_prediction_price>last_row['Close'][0]
                     pred_results['stop_loss']=full['stop_loss'].min()
                     # print(f"Adj Price {adj_prediction_price}")
                     # print(f"Adj Price w/high {adj_prediction_price*(1+ data['close_high_avg'].max())}")
                     pred_results['adj_prediction_price_w_high_inc']=adj_prediction_price*(1+ data['close_high_avg'].max())
+                    pred_results['adj_prediction_higher']=adj_prediction_price*(1+ data['close_high_avg'].max())>last_row['Close'][0]
+
                     
                     # Output the results
                     # print(f"Total Predictions: {total_predictions}")
