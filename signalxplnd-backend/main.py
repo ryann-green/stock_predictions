@@ -137,6 +137,14 @@ def lambda_handler(event, context):
                 ,'NAK'
                 ,'TOI'
                 ,'WOOF'
+                ,'HYEX'
+                ,'NEXN'
+                ,'OCG'
+                ,'QCG'
+                ,'SGHC'
+                ,'SIEB'
+                ,'UXIN'
+                ,'VLN'
                 ]
         end_date = current_date
         # end_date = datetime(year, month, day)
