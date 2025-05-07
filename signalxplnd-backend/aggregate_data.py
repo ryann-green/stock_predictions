@@ -14,6 +14,9 @@ def rank_data(event,context):
 
     # Filter to only include rows where predicted_price_higher is True
     filtered_data = data[data['predicted_price_higher'] == True].copy()
+    
+    # print('filtered data:')
+    # print(filtered_data)
 
     # Convert dates to datetime objects for calculation
     # Step 1: Optional, but helpful - clean the strings
@@ -67,8 +70,9 @@ def rank_data(event,context):
     
     # [print(ticker) for ticker in tickers]
     
-    
-
+    #----------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------
+    #Separate into downstream script dependency
     # Calculate the target price success ratio for each ticker
     #  This is how many times the target price was triggered of all the prediction backtests
     success_ratio = (
@@ -85,18 +89,23 @@ def rank_data(event,context):
         .reset_index()
 )
     
-    print(success_ratio)
+    # print(success_ratio)
 
     success_ratio['success_ratio_rank']=success_ratio['success_ratio'].rank(ascending=True, method='min').astype(int)
 
     # # success_ratio.sort_values('success_ratio',ascending=False).to_csv('rankings/target_success_ratio.csv')
-    print(success_ratio.sort_values('success_ratio',ascending=False))
+    # print(success_ratio.sort_values('success_ratio',ascending=False))
 
     write_to_s3(success_ratio.sort_values('success_ratio',ascending=False),'target_success_ratio.csv')
+    #----------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------
 
+    #----------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------
     # Merge success ratio into the exploded data
     exploded_data = exploded_data.merge(success_ratio, on='ticker')
-
+    # print(exploded_data)
+    
     # Group by ticker and timeframe, calculate the median profit percentage
     aggregated_data = (
         exploded_data.groupby(['ticker', 'timeframe', 'success_ratio'])['profit_pct_per_stock']
@@ -105,21 +114,36 @@ def rank_data(event,context):
         .rename(columns={'profit_pct_per_stock': 'median_profit_pct'})
     )
 
-    fourteen_day_median_profit_pct=aggregated_data[aggregated_data['timeframe'] == '14'].copy()[['ticker','median_profit_pct','success_ratio']]
+    # fourteen_day_median_profit_pct=aggregated_data[aggregated_data['timeframe'] == '14'].copy()[['ticker','median_profit_pct','success_ratio']]
+    fourteen_day_median_profit_pct=aggregated_data.groupby('ticker')[['success_ratio','median_profit_pct']].median().reset_index()
+
     fourteen_day_median_profit_pct['14_day_median_profit_rank']=fourteen_day_median_profit_pct['median_profit_pct'].rank(ascending=True, method='min').astype(int)
     fourteen_day_median_profit_pct['success_ratio_rank']=fourteen_day_median_profit_pct['success_ratio'].rank(ascending=True, method='min').astype(int)
 
-    agg_data_df=fourteen_day_median_profit_pct.sort_values('14_day_median_profit_rank',ascending=False)
+    # print(aggregated_data.groupby('ticker')[['success_ratio','median_profit_pct']].median().reset_index())
+    # print(fourteen_day_median_profit_pct)
+    
+    agg_data_df=fourteen_day_median_profit_pct.sort_values('success_ratio_rank',ascending=False)
 
+    # print('agg_data_df:')
+    # print(agg_data_df)
+
+    fourteen_30_spread=aggregated_data.pivot(index='ticker', columns='timeframe', values='median_profit_pct')[['14','30']].fillna(0)
+    print('aggregated_data')
     print(aggregated_data)
+    print('fourteen-30')
+    print(fourteen_30_spread)
 
-    fourteen_30_spread=aggregated_data.pivot(index='ticker', columns='timeframe', values='median_profit_pct')[['14','30']].dropna()
+
+
     fourteen_30_spread['14-30_profit_spread']=fourteen_30_spread['14']-fourteen_30_spread['30']
+    
     spread_df=pd.DataFrame(fourteen_30_spread['14-30_profit_spread'])
     spread_df['spread_rank']=spread_df['14-30_profit_spread'].rank(ascending=True, method='min').astype(int)
-
+    
+    # print('spread df:')
+    # print(spread_df)
     merged_df = pd.merge(agg_data_df, spread_df, on='ticker')
-    print(merged_df)
 
     # Pivot the data for bell curvevisualization
     pivot_data = aggregated_data.pivot(index='timeframe', columns='ticker', values='median_profit_pct')
@@ -135,7 +159,7 @@ def rank_data(event,context):
 
     # Prepare for non-trigger rate calc
     backtest_ticker_count=filtered_data.groupby('ticker')['pred_date'].count()
-    print(backtest_ticker_count)
+    # print(backtest_ticker_count)
 
 
 
@@ -158,6 +182,8 @@ def rank_data(event,context):
     non_trigger_rate=pd.DataFrame(non_trigger_merge['non_trigger_rate'])
 
     merged_df=pd.merge(merged_df, non_trigger_rate, on='ticker',how='left')
+    
+    # print(merged_df)
     merged_df['non_trigger_rate']=merged_df['non_trigger_rate'].fillna(0)
     merged_df['non_trigger_rank']=merged_df['non_trigger_rate'].rank(ascending=False, method='min').astype(int)
 
@@ -172,6 +198,9 @@ def rank_data(event,context):
     filtered_predictions_df=filtered_predictions_data[['ticker','last_date_for_prediction','predicted_higher_success_rate','overall_success_rate','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
     filtered_predictions_df['ranking_mix']=filtered_predictions_df['predicted_higher_success_rate']*.75+filtered_predictions_df['overall_success_rate']*.25
     filtered_predictions_df_clean=filtered_predictions_df[['ticker','last_date_for_prediction','ranking_mix','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
+    # print(filtered_predictions_df_clean)
+    # print(merged_df)
+
 
     merged_df=pd.merge(merged_df, filtered_predictions_df_clean, on='ticker',how='left').dropna()
     merged_df['predictions_rank']=merged_df['ranking_mix'].rank(ascending=True, method='min').astype(int)
@@ -179,5 +208,8 @@ def rank_data(event,context):
 
     final_ranking=merged_df.dropna()[['ticker','last_date_for_prediction','14_day_median_profit_rank','success_ratio_rank','spread_rank','non_trigger_rank','predictions_rank','latest_close','stop_loss','adj_prediction_price_w_high_inc']]
     final_ranking['stop_loss_amt']=final_ranking['latest_close']*(1+final_ranking['stop_loss'])
+    
+    # print(final_ranking)
 
     write_to_s3(final_ranking,'latest_recs.csv')
+
