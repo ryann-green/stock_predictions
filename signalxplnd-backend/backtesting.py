@@ -222,6 +222,5 @@ def lambda_handler(event, context):
     
     print(f"Backtesting Ending at {datetime.now()}")
 
-lambda_handler(1,2)
         
         
